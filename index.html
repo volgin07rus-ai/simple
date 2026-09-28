@@ -1,0 +1,694 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Simple: IT-офис по подписке за 60 000 ₽ в месяц</title>
+  <meta name="description" content="Сайты, автоматизация, документооборот, интеграции, боты и AI для бизнеса. Одна команда и фиксированная цена 60 000 ₽ в месяц" />
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <a class="skip" href="#main">К содержимому</a>
+
+  <header class="hdr" id="hdr">
+    <a class="brand" href="#top" aria-label="Simple, наверх">
+      <span class="brand-ico" data-knife aria-hidden="true"></span>
+      simple
+    </a>
+    <nav class="nav" aria-label="Разделы">
+      <a href="#how">Как работаем</a>
+      <a href="#services">Что делаем</a>
+      <a href="#works">Работы</a>
+      <a href="#pricing">Цена</a>
+      <a href="#faq">Вопросы</a>
+    </nav>
+    <div class="hdr-right">
+      <a class="btn btn-lime btn-sm" href="brief.html"><span class="btn-knife" data-knife aria-hidden="true"></span>Обсудить задачу</a>
+      <button class="burger" type="button" aria-expanded="false" aria-controls="menu" aria-label="Открыть меню"><i></i><i></i><i></i></button>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="top">
+      <div class="hero-bg" aria-hidden="true">
+        <div class="waves" id="waves"></div>
+        <div class="grid"></div>
+        <div class="aurora a1"></div>
+        <div class="aurora a2"></div>
+        <div class="spot"></div>
+      </div>
+
+      <div class="hero-inner">
+        <div class="hero-copy">
+          <h1 class="h1" data-lines>
+            <span class="ln"><span style="--d:620ms">Ваш IT-офис</span></span>
+            <span class="ln"><span style="--d:740ms" class="accent">по подписке</span></span>
+          </h1>
+
+          <p class="lead rv" style="--d:880ms">
+            Сайты, автоматизация, интеграции, боты и AI для вашей компании.
+            Одна команда вместо разработчика, аналитика и администратора в&nbsp;штате
+          </p>
+
+          <div class="ctas rv" style="--d:1000ms">
+            <a class="btn btn-lime" href="brief.html">
+              <span class="btn-knife" data-knife aria-hidden="true"></span>
+              Обсудить задачу
+            </a>
+            <p class="price"><b>60&nbsp;000&nbsp;₽</b><span>в месяц,<br />цена фиксированная</span></p>
+          </div>
+        </div>
+
+        <div class="hero-scene rv-scene" role="img" aria-label="Пример автоматизации: заявка из почты попадает в CRM или в учёт, менеджер получает уведомление в Telegram">
+          <div class="stage">
+            <div class="tilt" id="tilt">
+              <div class="panel">
+                <div class="p-head">
+                  <span class="p-ico" id="p-ico" aria-hidden="true"><svg viewBox="0 0 719 719"><use href="#logo" /></svg></span>
+                  <span class="p-title">Заявка с сайта</span>
+                  <span class="p-meta mono">4 шага / 2 ветки</span>
+                  <span class="p-status mono"><i></i>работает</span>
+                </div>
+
+                <div class="p-canvas">
+                  <span class="zoom mono">100%</span>
+
+                  <svg class="wires" viewBox="0 0 387.5 142" preserveAspectRatio="none" aria-hidden="true">
+                    <path class="w" id="w1" d="M112.5 70 C130 70,127 32,144 32" />
+                    <path class="w" id="w2" d="M112.5 70 C130 70,127 108,144 108" />
+                    <path class="w" id="w3" d="M244 32 C261 32,258 70,275 70" />
+                    <path class="w" id="w4" d="M244 108 C261 108,258 70,275 70" />
+                    <path class="w-on" data-for="w1" d="M112.5 70 C130 70,127 32,144 32" />
+                    <path class="w-on" data-for="w2" d="M112.5 70 C130 70,127 108,144 108" />
+                    <path class="w-on" data-for="w3" d="M244 32 C261 32,258 70,275 70" />
+                    <path class="w-on" data-for="w4" d="M244 108 C261 108,258 70,275 70" />
+                    <circle class="pulse" id="pulse" r="3.2" cx="-20" cy="-20" />
+                  </svg>
+
+                  <div class="node" id="n1" style="--x:1.25em;--y:5.2em">
+                    <b>Письмо с заявкой</b><span class="mono">почта</span>
+                  </div>
+                  <div class="node" id="n2" style="--x:14.4em;--y:1.4em">
+                    <b>Карточка в CRM</b><span class="mono">CRM</span>
+                  </div>
+                  <div class="node" id="n3" style="--x:14.4em;--y:9em">
+                    <b>Счёт по шаблону</b><span class="mono">учёт</span>
+                  </div>
+                  <div class="node" id="n4" style="--x:27.5em;--y:5.2em">
+                    <b>Уведомить менеджера</b><span class="mono">Telegram</span>
+                  </div>
+
+                  <span class="chip mono" id="c1" style="--x:11.6em;--y:4.6em">новый</span>
+                  <span class="chip mono" id="c2" style="--x:11.4em;--y:8.4em">в базе</span>
+                  <span class="chip chip-wait mono" id="c3" style="--x:27.6em;--y:9.6em"><i></i>ждёт ответа</span>
+                </div>
+
+                <div class="p-log">
+                  <p class="log-cap mono"><span>Что сделала схема</span><span>время на заявку</span></p>
+                  <div class="log-win"><ul class="log mono" id="log">
+                    <li><i></i><time>09:41:02</time><span>заявка → карточка в CRM</span><em>1,2 с</em></li>
+                    <li><i></i><time>09:38:57</time><span>заявка → счёт отправлен</span><em>2,1 с</em></li>
+                    <li><i></i><time>09:31:14</time><span>заявка → карточка в CRM</span><em>0,9 с</em></li>
+                  </ul></div>
+                </div>
+                <div class="glare" aria-hidden="true"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- 2. Штат против подписки: три позиции стекаются в одну подписку -->
+    <section class="sec" id="office" data-reveal>
+      <div class="wrap">
+        <div class="sec-head">
+          <h2 class="h2">
+            <span class="ln"><span style="--d:0ms">Зачем содержать офис,</span></span>
+            <span class="ln"><span style="--d:110ms">если его можно <span class="accent">подключить?</span></span></span>
+          </h2>
+          <p class="sec-note rv" style="--d:260ms">
+            Разработчик, аналитик и администратор в штате означают три найма, три зарплаты с налогами,
+            технику и рабочие места. Simple закрывает те же задачи одной подпиской
+          </p>
+        </div>
+
+        <div class="merge" id="merge">
+          <svg class="merge-wires" id="merge-wires" aria-hidden="true"></svg>
+
+          <ul class="roles" aria-label="Что нужно содержать в штате">
+            <li class="role rv" style="--d:320ms" data-i="0">
+              <b>Разработчик</b>
+              <span>найм, зарплата, налоги, техника</span>
+            </li>
+            <li class="role rv" style="--d:440ms" data-i="1">
+              <b>Аналитик</b>
+              <span>найм, зарплата, налоги, техника</span>
+            </li>
+            <li class="role rv" style="--d:560ms" data-i="2">
+              <b>Администратор</b>
+              <span>найм, зарплата, налоги, рабочее место</span>
+            </li>
+          </ul>
+
+          <div class="hub rv" style="--d:1100ms">
+            <span class="hub-ico" aria-hidden="true"><svg viewBox="0 0 470 409"><use href="#knife" /></svg></span>
+            <p class="hub-name">Simple</p>
+            <p class="hub-price">60&nbsp;000&nbsp;₽ <span>в месяц</span></p>
+            <p class="hub-note">Те же задачи одной подпиской. Команда уже собрана, искать людей не нужно</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Узнаёте свою ситуацию: при прокрутке рутина вычёркивается, под ней проявляется решение -->
+    <section class="sec fit" id="fit" data-reveal>
+      <!-- фон из пикселей в пустой левой колонке (pixels.js), только на компьютере -->
+      <div class="pixels pixels-fit" data-pixels aria-hidden="true"></div>
+      <div class="wrap fit-grid">
+        <div class="fit-aside">
+          <h2 class="h2">
+            <span class="ln"><span style="--d:0ms">Узнаёте свою</span></span>
+            <span class="ln"><span style="--d:110ms" class="accent">ситуацию?</span></span>
+          </h2>
+          <p class="sec-note fit-note rv" style="--d:260ms">
+            Шесть ситуаций, с которыми к нам приходят чаще всего. Под каждой то, что мы с ней сделаем
+          </p>
+        </div>
+
+        <div class="fit-main">
+          <!-- Ничего нажимать не нужно: строка доходит до середины экрана, проблема зачёркивается, под ней проявляется решение -->
+          <ol class="fit-list" id="fit-list">
+            <li class="fit-row" data-reveal data-fit style="--d:0ms">
+              <span class="fit-no">01</span>
+              <div class="fit-body">
+                <p class="fit-pain"><span>Заявки приходят в почту, мессенджер и по телефону, и кто-то вручную переносит их в таблицу</span></p>
+                <p class="fit-fix"><b>Сделаем так:</b> заявки с сайта, из почты и мессенджеров сами попадают в CRM, а менеджер получает уведомление</p>
+              </div>
+            </li>
+            <li class="fit-row" data-reveal data-fit style="--d:70ms">
+              <span class="fit-no">02</span>
+              <div class="fit-body">
+                <p class="fit-pain"><span>Счета и коммерческие предложения каждый раз собирают руками из одних и тех же шаблонов</span></p>
+                <p class="fit-fix"><b>Сделаем так:</b> счета и КП собираются по вашим шаблонам и данным, человеку остаётся проверить и отправить</p>
+              </div>
+            </li>
+            <li class="fit-row" data-reveal data-fit style="--d:140ms">
+              <span class="fit-no">03</span>
+              <div class="fit-body">
+                <p class="fit-pain"><span>CRM, склад и учёт живут отдельно, данные между ними переносят люди</span></p>
+                <p class="fit-fix"><b>Сделаем так:</b> свяжем системы между собой, и данные перестанут переносить руками</p>
+              </div>
+            </li>
+            <li class="fit-row" data-reveal data-fit style="--d:210ms">
+              <span class="fit-no">04</span>
+              <div class="fit-body">
+                <p class="fit-pain"><span>Юрист тратит часы на типовые договоры, чтобы найти в них пару важных условий</span></p>
+                <p class="fit-fix"><b>Сделаем так:</b> AI отметит в договоре важные условия и отклонения, юрист посмотрит только на них</p>
+              </div>
+            </li>
+            <li class="fit-row" data-reveal data-fit style="--d:280ms">
+              <span class="fit-no">05</span>
+              <div class="fit-body">
+                <p class="fit-pain"><span>Нужные тендеры находят поздно или не находят вовсе</span></p>
+                <p class="fit-fix"><b>Сделаем так:</b> бот будет следить за площадками и присылать команде подходящие закупки</p>
+              </div>
+            </li>
+            <li class="fit-row" data-reveal data-fit style="--d:350ms">
+              <span class="fit-no">06</span>
+              <div class="fit-body">
+                <p class="fit-pain"><span>Есть идея продукта или сайта, а своей разработки нет</span></p>
+                <p class="fit-fix"><b>Сделаем так:</b> соберём сайт, бота или своё ПО под задачу и дальше будем их поддерживать</p>
+              </div>
+            </li>
+          </ol>
+
+          <div class="fit-more rv" style="--d:120ms">
+            <p class="fit-more-title">Вашей задачи нет в списке?</p>
+            <p class="fit-more-text">В подписку входит любая IT-задача, не только эти шесть. Опишите её как есть, идеальный бриф не нужен</p>
+            <a class="btn btn-lime" href="brief.html">
+              <span class="btn-knife" data-knife aria-hidden="true"></span>
+              Обсудить задачу
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Что делаем: шесть направлений, справа живая сцена выбранного направления -->
+    <section class="sec svc" id="services" data-reveal>
+      <div class="wrap">
+        <div class="sec-head">
+          <h2 class="h2">
+            <span class="ln"><span style="--d:0ms">Шесть направлений</span></span>
+            <span class="ln"><span style="--d:110ms" class="accent">в одной подписке</span></span>
+          </h2>
+          <p class="sec-note rv" style="--d:260ms">
+            Не нужно искать отдельных подрядчиков на сайт, бота и интеграции. Всё делает одна команда за одну цену
+          </p>
+        </div>
+
+        <div class="svc-grid">
+          <ol class="svc-list rv" style="--d:320ms" id="svc-list">
+            <li class="svc-item is-active" data-demo="site">
+              <button class="svc-btn" type="button" id="svc-b1" aria-expanded="true" aria-controls="svc-d1">
+                <span class="svc-no">01</span>
+                <span class="svc-name">Сайты</span>
+              </button>
+              <div class="svc-desc" id="svc-d1" role="region" aria-labelledby="svc-b1"><p>Лендинги, корпоративные сайты и цифровая упаковка. Собираем сайт так, чтобы с него приходили заявки</p></div>
+              <span class="svc-bar" aria-hidden="true"><i></i></span>
+            </li>
+            <li class="svc-item" data-demo="kp">
+              <button class="svc-btn" type="button" id="svc-b2" aria-expanded="false" aria-controls="svc-d2">
+                <span class="svc-no">02</span>
+                <span class="svc-name">Автоматизация рутины</span>
+              </button>
+              <div class="svc-desc" id="svc-d2" role="region" aria-labelledby="svc-b2"><p>Счета и КП по шаблонам компании, мониторинг тендеров, разбор входящей почты. Данные, статусы и отчёты собираются сами</p></div>
+              <span class="svc-bar" aria-hidden="true"><i></i></span>
+            </li>
+            <li class="svc-item" data-demo="docs">
+              <button class="svc-btn" type="button" id="svc-b3" aria-expanded="false" aria-controls="svc-d3">
+                <span class="svc-no">03</span>
+                <span class="svc-name">Документооборот</span>
+              </button>
+              <div class="svc-desc" id="svc-d3" role="region" aria-labelledby="svc-b3"><p>Согласования и статусы документов в одном месте. Декларации заполняются сами и проходят проверку перед подачей. AI отмечает важное в договорах</p></div>
+              <span class="svc-bar" aria-hidden="true"><i></i></span>
+            </li>
+            <li class="svc-item" data-demo="sync">
+              <button class="svc-btn" type="button" id="svc-b4" aria-expanded="false" aria-controls="svc-d4">
+                <span class="svc-no">04</span>
+                <span class="svc-name">Интеграции и своё ПО</span>
+              </button>
+              <div class="svc-desc" id="svc-d4" role="region" aria-labelledby="svc-b4"><p>Связываем CRM, учёт, склад и системы поставщиков. Делаем программы под ваши процессы, в том числе по образцу решения, которое вам нравится</p></div>
+              <span class="svc-bar" aria-hidden="true"><i></i></span>
+            </li>
+            <li class="svc-item" data-demo="bot">
+              <button class="svc-btn" type="button" id="svc-b5" aria-expanded="false" aria-controls="svc-d5">
+                <span class="svc-no">05</span>
+                <span class="svc-name">Боты и мини-аппы</span>
+              </button>
+              <div class="svc-desc" id="svc-d5" role="region" aria-labelledby="svc-b5"><p>Боты отвечают клиентам на типовые вопросы и передают сложные случаи менеджеру. Внутренние боты забирают у команды рутину</p></div>
+              <span class="svc-bar" aria-hidden="true"><i></i></span>
+            </li>
+            <li class="svc-item" data-demo="call">
+              <button class="svc-btn" type="button" id="svc-b6" aria-expanded="false" aria-controls="svc-d6">
+                <span class="svc-no">06</span>
+                <span class="svc-name">AI-телефония</span>
+              </button>
+              <div class="svc-desc" id="svc-d6" role="region" aria-labelledby="svc-b6"><p>Расшифровка разговоров, сценарии для типовых обращений, итоги звонков сразу в CRM</p></div>
+              <span class="svc-bar" aria-hidden="true"><i></i></span>
+            </li>
+          </ol>
+
+          <!-- фон из пикселей чуть выглядывает из-под экрана с примером (pixels.js), только на компьютере -->
+          <div class="pixels pixels-svc" data-pixels data-fade=".12" data-density="1.55" aria-hidden="true"></div>
+          <!-- Экран: пример того, как это выглядит в работе. Сцены рисует services.js -->
+          <div class="svc-screen rv" style="--d:420ms" id="svc-screen" aria-hidden="true">
+            <p class="svc-cap"><span class="svc-cap-label">Пример</span><span class="svc-cap-text" id="svc-cap">Сайт: заявка сразу уходит менеджеру</span></p>
+            <div class="svc-stage" id="svc-stage"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. Дизайн и разработка: работы на наклонной стене, колонки плывут навстречу друг другу -->
+    <section class="sec works-teaser" id="works" data-reveal>
+      <div class="wrap">
+        <div class="sec-head">
+          <h2 class="h2">
+            <span class="ln"><span style="--d:0ms">Сайты и приложения</span></span>
+            <span class="ln"><span style="--d:110ms" class="accent">в той же подписке</span></span>
+          </h2>
+          <p class="sec-note rv" style="--d:260ms">
+            Проектируем и собираем сайты, приложения, логотипы и презентации: и дизайн, и техническую часть.
+            Всё это входит в 60&nbsp;000&nbsp;₽ в месяц
+          </p>
+        </div>
+      </div>
+
+      <!-- Стена работ (DriftWall): наведите на плитку, колонка остановится и покажет подпись -->
+      <div class="works-wall rv" style="--d:320ms" id="works-wall"></div>
+
+      <div class="wrap works-more rv" style="--d:420ms">
+        <a class="btn btn-line" href="works.html" aria-label="Смотреть все работы">Смотреть <span class="btn-knife" data-knife aria-hidden="true"></span></a>
+      </div>
+    </section>
+
+    <!-- 6. Как устроен месяц: пять стеклянных карточек, шаги загораются по кругу сами -->
+    <section class="sec how" id="how" data-reveal>
+      <div class="wrap">
+        <div class="sec-head">
+          <h2 class="h2">
+            <span class="ln"><span style="--d:0ms">Что происходит</span></span>
+            <span class="ln"><span style="--d:110ms" class="accent">после подключения</span></span>
+          </h2>
+          <p class="sec-note rv" style="--d:260ms">
+            Каждый месяц идёт по одному циклу: от разбора процессов до готового результата
+          </p>
+        </div>
+
+        <div class="how-board rv" style="--d:320ms" id="how-board">
+          <ol class="how-cards">
+            <li class="how-card" data-step="0">
+              <div class="how-card-in glass">
+                <div class="how-vis" aria-hidden="true">
+                <div class="hv hv-diag">
+                  <p><span>Заявки</span><b style="--w:.5"></b></p>
+                  <p class="hv-hot"><span>Счета</span><b style="--w:.92"></b></p>
+                  <p><span>Отчёты</span><b style="--w:.34"></b></p>
+                </div>
+                </div>
+                <span class="how-no">01</span>
+                <h3 class="how-name">Диагностика</h3>
+                <p class="how-text">Разбираем процессы и находим, где команда теряет время</p>
+                <p class="how-you"><span>От вас:</span> рассказать, как всё устроено сейчас</p>
+                <span class="how-progress" aria-hidden="true"><i></i></span>
+                <span class="glass-glare" aria-hidden="true"></span>
+              </div>
+            </li>
+            <li class="how-card" data-step="1">
+              <div class="how-card-in glass">
+                <div class="how-vis" aria-hidden="true">
+                <div class="hv hv-prio">
+                  <p class="r1"><i></i>Отчёты по продажам</p>
+                  <p class="r2"><i></i>Счета по шаблону<em>первой</em></p>
+                  <p class="r3"><i></i>Бот для клиентов</p>
+                </div>
+                </div>
+                <span class="how-no">02</span>
+                <h3 class="how-name">Приоритеты</h3>
+                <p class="how-text">Выбираем задачу, которая даст эффект первой</p>
+                <p class="how-you"><span>От вас:</span> решить вместе с нами, с чего начать</p>
+                <span class="how-progress" aria-hidden="true"><i></i></span>
+                <span class="glass-glare" aria-hidden="true"></span>
+              </div>
+            </li>
+            <li class="how-card" data-step="2">
+              <div class="how-card-in glass">
+                <div class="how-vis" aria-hidden="true">
+                <div class="hv hv-plan">
+                  <p><i></i>Объём этапа</p>
+                  <p><i></i>Результат</p>
+                  <p><i></i>Срок</p>
+                </div>
+                </div>
+                <span class="how-no">03</span>
+                <h3 class="how-name">План</h3>
+                <p class="how-text">Фиксируем объём и результат этапа до начала работы</p>
+                <p class="how-you"><span>От вас:</span> согласовать план</p>
+                <span class="how-progress" aria-hidden="true"><i></i></span>
+                <span class="glass-glare" aria-hidden="true"></span>
+              </div>
+            </li>
+            <li class="how-card" data-step="3">
+              <div class="how-card-in glass">
+                <div class="how-vis" aria-hidden="true">
+                <div class="hv hv-work">
+                  <p class="hv-work-top"><span><i></i>в работе</span><span>этап 1</span></p>
+                  <span class="hv-work-bar"><i></i></span>
+                  <p class="hv-work-rows"><b></b><b></b><b></b></p>
+                </div>
+                </div>
+                <span class="how-no">04</span>
+                <h3 class="how-name">Работа</h3>
+                <p class="how-text">Делаем выбранный этап</p>
+                <p class="how-you"><span>От вас:</span> отвечать на вопросы по ходу</p>
+                <span class="how-progress" aria-hidden="true"><i></i></span>
+                <span class="glass-glare" aria-hidden="true"></span>
+              </div>
+            </li>
+            <li class="how-card" data-step="4">
+              <div class="how-card-in glass">
+                <div class="how-vis" aria-hidden="true">
+                <div class="hv hv-rev">
+                  <p class="hv-rev-done"><i></i>Этап готов</p>
+                  <p class="hv-rev-next">Дальше: следующая задача</p>
+                </div>
+                </div>
+                <span class="how-no">05</span>
+                <h3 class="how-name">Разбор</h3>
+                <p class="how-text">Смотрим на результат и решаем, что делать дальше</p>
+                <p class="how-you"><span>От вас:</span> посмотреть результат</p>
+                <span class="how-progress" aria-hidden="true"><i></i></span>
+                <span class="glass-glare" aria-hidden="true"></span>
+              </div>
+            </li>
+          </ol>
+          <p class="how-loop"><i aria-hidden="true"></i>Всё, что мы сделали, дальше поддерживаем и развиваем. Следующий месяц начинается с нового разбора</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. Цена: из щели кассы выходит чек, где всё «входит», и одна сумма. Хвост чека заворачивается к зрителю -->
+    <section class="sec pricing" id="pricing" data-reveal>
+      <!-- фон из пикселей: в пустом левом низу и в промежутке между текстом и чеком (pixels.js), только на компьютере -->
+      <div class="pixels pixels-price" data-pixels aria-hidden="true"></div>
+      <div class="pixels pixels-price-mid" data-pixels aria-hidden="true"></div>
+      <div class="wrap price-grid">
+        <div class="price-copy">
+          <h2 class="h2">
+            <span class="ln"><span style="--d:0ms">Одна подписка</span></span>
+            <span class="ln"><span style="--d:110ms" class="accent">одна цена</span></span>
+          </h2>
+          <p class="sec-note price-note rv" style="--d:260ms">
+            Цена открыта на сайте и не меняется по ходу работы. В чеке всё, что в неё входит
+          </p>
+          <div class="price-cta rv" style="--d:380ms">
+            <a class="btn btn-lime" href="brief.html">
+              <span class="btn-knife" data-knife aria-hidden="true"></span>
+              Обсудить задачу
+            </a>
+            <p class="price-hint">Опишите задачу своими словами, идеальный бриф не нужен</p>
+          </div>
+        </div>
+
+        <div class="receipt rv" style="--d:200ms" id="receipt">
+          <div class="receipt-printer" aria-hidden="true"><span class="receipt-slot"></span><span class="receipt-led"></span></div>
+          <div class="receipt-window">
+            <div class="receipt-paper">
+              <!-- корешок: остаётся в щели, когда лист оторвут; по его нижнему краю идёт перфорация -->
+              <div class="receipt-stub" aria-hidden="true"></div>
+              <div class="receipt-sheet">
+                <div class="receipt-body">
+                <p class="receipt-head"><svg viewBox="0 0 719 719" aria-hidden="true"><use href="#logo" /></svg><b>Simple</b><span>IT-офис по подписке</span></p>
+                <p class="receipt-meta"><span>Подписка</span><span>1 месяц</span></p>
+                <ul class="receipt-items">
+                  <li><span>Разбор процессов и план</span><i aria-hidden="true"></i><b>входит</b></li>
+                  <li><span>Автоматизация и интеграции</span><i aria-hidden="true"></i><b>входит</b></li>
+                  <li><span>Боты, сайты, приложения</span><i aria-hidden="true"></i><b>входит</b></li>
+                  <li><span>Дизайн: логотипы, презентации</span><i aria-hidden="true"></i><b>входит</b></li>
+                  <li><span>Поддержка сделанного</span><i aria-hidden="true"></i><b>входит</b></li>
+                  <li><span>Серверы, сервисы, лицензии</span><i aria-hidden="true"></i><b>входит</b></li>
+                  <li><span>Разбор результата</span><i aria-hidden="true"></i><b>входит</b></li>
+                </ul>
+                <p class="receipt-total"><span>Итого</span><b><mark>60&nbsp;000&nbsp;₽</mark></b></p>
+                <p class="receipt-per">в месяц</p>
+                <span class="receipt-code" aria-hidden="true"></span>
+                <span class="receipt-sticker">Цена фиксированная</span>
+                </div>
+                <!-- хвост чека: шесть тонких полос, каждая загнута к зрителю чуть сильнее предыдущей -->
+                <div class="receipt-curl" aria-hidden="true"><span class="rc-s" style="--i:0"><span class="rc-s" style="--i:1"><span class="rc-s" style="--i:2"><span class="rc-s" style="--i:3"><span class="rc-s" style="--i:4"><span class="rc-s rc-end" style="--i:5"></span></span></span></span></span></span></div>
+                <!-- за низ чека его можно тянуть и на телефоне: остальная площадь остаётся для прокрутки страницы -->
+                <span class="receipt-grip" aria-hidden="true"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9. Вопросы: на компьютере вопрос уходит в чат справа, и Simple отвечает. На планшете и телефоне ответ раскрывается под вопросом.
+         Без скрипта все ответы просто открыты -->
+    <section class="sec faq" id="faq" data-reveal>
+      <div class="wrap faq-grid">
+        <div class="faq-side">
+          <h2 class="h2">
+            <span class="ln"><span style="--d:0ms">Вопросы</span></span>
+            <span class="ln"><span style="--d:110ms" class="accent">до подключения</span></span>
+          </h2>
+          <p class="sec-note faq-note rv" style="--d:260ms">То, что чаще всего спрашивают перед стартом</p>
+          <ol class="faq-list rv" style="--d:360ms">
+            <li class="faq-item">
+              <button class="faq-q" type="button" id="faq-q1"><span class="faq-no">01</span><span class="faq-text">Что входит в подписку?</span><i class="faq-plus" aria-hidden="true"></i></button>
+              <div class="faq-a" id="faq-a1" role="region" aria-labelledby="faq-q1"><div class="faq-a-in">
+                <div class="msg msg-in"><span class="msg-ava" aria-hidden="true"><svg viewBox="0 0 719 719"><use href="#logo" /></svg></span><p class="msg-b">Каждый месяц мы разбираем процессы, выбираем задачу, которая даст эффект первой, фиксируем план, делаем этап и вместе смотрим на результат. Точный объём согласуем до старта. Всё, что сделали, дальше поддерживаем и развиваем</p></div>
+              </div></div>
+            </li>
+            <li class="faq-item">
+              <button class="faq-q" type="button" id="faq-q2"><span class="faq-no">02</span><span class="faq-text">Сколько задач можно поставить?</span><i class="faq-plus" aria-hidden="true"></i></button>
+              <div class="faq-a" id="faq-a2" role="region" aria-labelledby="faq-q2"><div class="faq-a-in">
+                <div class="msg msg-in"><span class="msg-ava" aria-hidden="true"><svg viewBox="0 0 719 719"><use href="#logo" /></svg></span><p class="msg-b">Приносите всё, что накопилось: разовые идеи и постоянную работу. Вместе расставляем приоритеты, и каждый месяц в работу идёт то, что даст эффект первым. Остальное ждёт своей очереди и не теряется</p></div>
+              </div></div>
+            </li>
+            <li class="faq-item">
+              <button class="faq-q" type="button" id="faq-q3"><span class="faq-no">03</span><span class="faq-text">Что если задача не помещается в месяц?</span><i class="faq-plus" aria-hidden="true"></i></button>
+              <div class="faq-a" id="faq-a3" role="region" aria-labelledby="faq-q3"><div class="faq-a-in">
+                <div class="msg msg-in"><span class="msg-ava" aria-hidden="true"><svg viewBox="0 0 719 719"><use href="#logo" /></svg></span><p class="msg-b">Делим её на этапы. Каждый этап заканчивается результатом, которым уже можно пользоваться, а следующий идёт в следующем месяце</p></div>
+              </div></div>
+            </li>
+            <li class="faq-item">
+              <button class="faq-q" type="button" id="faq-q4"><span class="faq-no">04</span><span class="faq-text">Серверы и лицензии оплачиваются отдельно?</span><i class="faq-plus" aria-hidden="true"></i></button>
+              <div class="faq-a" id="faq-a4" role="region" aria-labelledby="faq-q4"><div class="faq-a-in">
+                <div class="msg msg-in"><span class="msg-ava" aria-hidden="true"><svg viewBox="0 0 719 719"><use href="#logo" /></svg></span><p class="msg-b">Нет, они уже входят в подписку: серверы, платные сервисы, лицензии. Доплачивать за них не нужно</p></div>
+              </div></div>
+            </li>
+            <li class="faq-item">
+              <button class="faq-q" type="button" id="faq-q5"><span class="faq-no">05</span><span class="faq-text">Как оформляется работа?</span><i class="faq-plus" aria-hidden="true"></i></button>
+              <div class="faq-a" id="faq-a5" role="region" aria-labelledby="faq-q5"><div class="faq-a-in">
+                <div class="msg msg-in"><span class="msg-ava" aria-hidden="true"><svg viewBox="0 0 719 719"><use href="#logo" /></svg></span><p class="msg-b">По договору, оплата раз в месяц. Сумма та же, что на сайте: 60&nbsp;000&nbsp;₽</p></div>
+              </div></div>
+            </li>
+            <li class="faq-item">
+              <button class="faq-q" type="button" id="faq-q6"><span class="faq-no">06</span><span class="faq-text">Можно ли отключить подписку?</span><i class="faq-plus" aria-hidden="true"></i></button>
+              <div class="faq-a" id="faq-a6" role="region" aria-labelledby="faq-q6"><div class="faq-a-in">
+                <div class="msg msg-in"><span class="msg-ava" aria-hidden="true"><svg viewBox="0 0 719 719"><use href="#logo" /></svg></span><p class="msg-b">Да, без минимального срока. Подписка помесячная: предупредите до начала следующего месяца, а текущий мы доведём до результата</p></div>
+              </div></div>
+            </li>
+            <li class="faq-item">
+              <button class="faq-q" type="button" id="faq-q7"><span class="faq-no">07</span><span class="faq-text">Кому принадлежит код?</span><i class="faq-plus" aria-hidden="true"></i></button>
+              <div class="faq-a" id="faq-a7" role="region" aria-labelledby="faq-q7"><div class="faq-a-in">
+                <div class="msg msg-in"><span class="msg-ava" aria-hidden="true"><svg viewBox="0 0 719 719"><use href="#logo" /></svg></span><p class="msg-b">Код принадлежит Simple. Мы за него отвечаем: поддерживаем, обновляем и развиваем, пока идёт подписка. Данные, которые в нём хранятся, остаются вашими</p></div>
+              </div></div>
+            </li>
+            <li class="faq-item">
+              <button class="faq-q" type="button" id="faq-q8"><span class="faq-no">08</span><span class="faq-text">Как вы защищаете данные?</span><i class="faq-plus" aria-hidden="true"></i></button>
+              <div class="faq-a" id="faq-a8" role="region" aria-labelledby="faq-q8"><div class="faq-a-in">
+                <div class="msg msg-in"><span class="msg-ava" aria-hidden="true"><svg viewBox="0 0 719 719"><use href="#logo" /></svg></span><p class="msg-b">Для чувствительных процессов делаем приложения без доступа в интернет и ставим локальные версии AI. Данные не уходят во внешние сервисы</p></div>
+              </div></div>
+            </li>
+          </ol>
+          <p class="faq-more rv" style="--d:460ms">Своего вопроса нет? Напишите в Telegram <a href="https://t.me/simple_ai_team" target="_blank" rel="noopener">@simple_ai_team</a> или на <a href="mailto:info@simplemind.ru">info@simplemind.ru</a></p>
+        </div>
+
+        <div class="faq-chat rv" style="--d:200ms">
+          <div class="faq-chat-head">
+            <span class="faq-chat-ico" aria-hidden="true"><svg viewBox="0 0 719 719"><use href="#logo" /></svg></span>
+            <b>Simple</b>
+            <span class="faq-chat-meta">IT-офис по подписке</span>
+            <span class="faq-status" aria-hidden="true">печатает<i></i><i></i><i></i></span>
+          </div>
+          <div class="faq-thread" id="faq-thread" aria-live="polite">
+            <div class="msg msg-in"><span class="msg-ava" aria-hidden="true"><svg viewBox="0 0 719 719"><use href="#logo" /></svg></span><p class="msg-b">Здравствуйте. Выберите вопрос слева, ответим здесь</p></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 11. Финальный призыв: запутанная линия процесса распрямляется и приходит в кнопку (final.js) -->
+    <section class="sec final" id="cta" data-reveal>
+      <div class="wrap">
+        <div class="sec-head final-head">
+          <h2 class="h2 final-h">
+            <span class="ln"><span style="--d:0ms">Покажите процесс,</span></span>
+            <span class="ln"><span style="--d:110ms" class="accent">мы упростим его</span></span>
+          </h2>
+          <p class="sec-note rv" style="--d:260ms">Идеальный бриф не нужен. Достаточно одной ситуации, где команда тратит время вручную</p>
+        </div>
+        <div class="final-row rv" style="--d:360ms">
+          <svg class="final-line" aria-hidden="true">
+            <defs>
+              <linearGradient id="final-grad" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="1000" y2="0">
+                <stop offset="0" stop-color="#D8FF32" />
+                <stop offset="0" stop-color="#D8FF32" />
+                <stop offset="0" stop-color="#F3F5EE" stop-opacity=".3" />
+                <stop offset="1" stop-color="#F3F5EE" stop-opacity=".3" />
+              </linearGradient>
+            </defs>
+            <path class="final-path" stroke="url(#final-grad)" />
+            <circle class="final-pulse" r="3" cx="-20" cy="-20" />
+          </svg>
+          <a class="btn btn-lime final-btn" href="brief.html">
+            <span class="btn-knife" data-knife aria-hidden="true"></span>
+            Обсудить задачу
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Подпись в конце страницы: большое Simple (TechText в цветах компании). Остаётся последней, над подвалом -->
+    <section class="wordmark" aria-label="Simple">
+      <!-- фон из пикселей под призывом и надписью: страница заканчивается тем же полем, что и начинается -->
+      <div class="pixels pixels-end" data-pixels aria-hidden="true"></div>
+      <div class="wordmark-stage" data-techtext="Simple"></div>
+    </section>
+  </main>
+
+  <!-- 12. Подвал -->
+  <footer class="ftr">
+    <div class="wrap">
+      <div class="ftr-top">
+        <div class="ftr-brand">
+          <a class="brand" href="#top" aria-label="Simple, наверх">
+            <span class="brand-ico" data-knife aria-hidden="true"></span>
+            simple
+          </a>
+          <p class="ftr-tag">Ваш IT-офис по подписке</p>
+        </div>
+        <nav class="ftr-nav" aria-label="Разделы внизу страницы">
+          <a href="#how">Как работаем</a>
+          <a href="#services">Что делаем</a>
+          <a href="#works">Работы</a>
+          <a href="#pricing">Цена</a>
+          <a href="#faq">Вопросы</a>
+        </nav>
+        <div class="ftr-contacts">
+          <a class="ftr-phone" href="tel:+79255558290">+7&nbsp;925&nbsp;555-82-90</a>
+          <a href="mailto:info@simplemind.ru">info@simplemind.ru</a>
+          <a href="https://t.me/simple_ai_team" target="_blank" rel="noopener">Telegram @simple_ai_team</a>
+        </div>
+      </div>
+      <div class="ftr-bottom">
+        <p>ИП Вязгин · ОГРНИП 304280112700192 · ИНН 280100638001</p>
+        <a href="https://simplemind.ru/privacy">Политика обработки персональных данных</a>
+        <p>© 2026 Simple · Твой швейцарский нож в бизнесе</p>
+      </div>
+    </div>
+  </footer>
+
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="logo" viewBox="0 0 719 719">
+      <!-- Логотип из присланного файла «logo simple.svg»: плашка и нож -->
+      <path d="M539.25 0H179.75C80.4768 0 0 80.4768 0 179.75V539.25C0 638.523 80.4768 719 179.75 719H539.25C638.523 719 719 638.523 719 539.25V179.75C719 80.4768 638.523 0 539.25 0Z" fill="#0B0B0B"/>
+      <g fill="#D8FF32">
+        <path d="M348.737 437.896H392.282V350.808H348.737V437.896Z"/>
+        <path fill-rule="evenodd" clip-rule="evenodd" d="M311 183.026C311 179.041 312.865 175.219 316.186 172.401C319.506 169.583 324.009 168 328.705 168H377.885L431 213.078V344.974C431 348.959 429.135 352.781 425.814 355.599C422.494 358.417 417.991 360 413.295 360H328.705C324.009 360 319.506 358.417 316.186 355.599C312.865 352.781 311 348.959 311 344.974V183.026ZM338.541 239.791H403.459V254.817H338.541V239.791ZM338.541 276.522H403.459V291.548H338.541V276.522ZM338.541 313.252H377.885V328.278H338.541V313.252Z"/>
+        <path d="M540 238C549.2 274.8 572.2 297.8 609 307C572.2 316.2 549.2 339.2 540 376C530.8 339.2 507.8 316.2 471 307C507.8 297.8 530.8 274.8 540 238Z"/>
+        <path fill-rule="evenodd" clip-rule="evenodd" d="M233.001 428.729H508.018C525.037 428.729 541.359 435.49 553.394 447.524C565.428 459.559 572.189 475.881 572.189 492.9C572.189 509.919 565.428 526.241 553.394 538.276C541.359 550.31 525.037 557.071 508.018 557.071H233.001C215.982 557.071 199.66 550.31 187.625 538.276C175.591 526.241 168.83 509.919 168.83 492.9C168.83 475.881 175.591 459.559 187.625 447.524C199.66 435.49 215.982 428.729 233.001 428.729ZM301.755 492.9C301.755 487.733 299.703 482.779 296.05 479.125C292.396 475.472 287.441 473.42 282.275 473.42C277.108 473.42 272.153 475.472 268.5 479.125C264.847 482.779 262.794 487.733 262.794 492.9C262.794 498.067 264.847 503.021 268.5 506.675C272.153 510.328 277.108 512.38 282.275 512.38C287.441 512.38 292.396 510.328 296.05 506.675C299.703 503.021 301.755 498.067 301.755 492.9ZM478.225 492.9C478.225 487.733 476.172 482.779 472.519 479.125C468.866 475.472 463.911 473.42 458.744 473.42C453.578 473.42 448.623 475.472 444.97 479.125C441.316 482.779 439.264 487.733 439.264 492.9C439.264 498.067 441.316 503.021 444.97 506.675C448.623 510.328 453.578 512.38 458.744 512.38C463.911 512.38 468.866 510.328 472.519 506.675C476.172 503.021 478.225 498.067 478.225 492.9Z"/>
+        <rect width="248.32" height="37.8786" rx="18.9393" transform="matrix(-0.707107 -0.707107 -0.707107 0.707107 362.091 443.342)"/>
+        <rect x="392" y="429.945" width="147" height="35" transform="rotate(-45 392 429.945)"/>
+      </g>
+    </symbol>
+    <symbol id="knife" viewBox="150 158 470 409">
+      <!-- Тот же нож без плашки -->
+      <g fill="currentColor">
+        <path d="M348.737 437.896H392.282V350.808H348.737V437.896Z"/>
+        <path fill-rule="evenodd" clip-rule="evenodd" d="M311 183.026C311 179.041 312.865 175.219 316.186 172.401C319.506 169.583 324.009 168 328.705 168H377.885L431 213.078V344.974C431 348.959 429.135 352.781 425.814 355.599C422.494 358.417 417.991 360 413.295 360H328.705C324.009 360 319.506 358.417 316.186 355.599C312.865 352.781 311 348.959 311 344.974V183.026ZM338.541 239.791H403.459V254.817H338.541V239.791ZM338.541 276.522H403.459V291.548H338.541V276.522ZM338.541 313.252H377.885V328.278H338.541V313.252Z"/>
+        <path d="M540 238C549.2 274.8 572.2 297.8 609 307C572.2 316.2 549.2 339.2 540 376C530.8 339.2 507.8 316.2 471 307C507.8 297.8 530.8 274.8 540 238Z"/>
+        <path fill-rule="evenodd" clip-rule="evenodd" d="M233.001 428.729H508.018C525.037 428.729 541.359 435.49 553.394 447.524C565.428 459.559 572.189 475.881 572.189 492.9C572.189 509.919 565.428 526.241 553.394 538.276C541.359 550.31 525.037 557.071 508.018 557.071H233.001C215.982 557.071 199.66 550.31 187.625 538.276C175.591 526.241 168.83 509.919 168.83 492.9C168.83 475.881 175.591 459.559 187.625 447.524C199.66 435.49 215.982 428.729 233.001 428.729ZM301.755 492.9C301.755 487.733 299.703 482.779 296.05 479.125C292.396 475.472 287.441 473.42 282.275 473.42C277.108 473.42 272.153 475.472 268.5 479.125C264.847 482.779 262.794 487.733 262.794 492.9C262.794 498.067 264.847 503.021 268.5 506.675C272.153 510.328 277.108 512.38 282.275 512.38C287.441 512.38 292.396 510.328 296.05 506.675C299.703 503.021 301.755 498.067 301.755 492.9ZM478.225 492.9C478.225 487.733 476.172 482.779 472.519 479.125C468.866 475.472 463.911 473.42 458.744 473.42C453.578 473.42 448.623 475.472 444.97 479.125C441.316 482.779 439.264 487.733 439.264 492.9C439.264 498.067 441.316 503.021 444.97 506.675C448.623 510.328 453.578 512.38 458.744 512.38C463.911 512.38 468.866 510.328 472.519 506.675C476.172 503.021 478.225 498.067 478.225 492.9Z"/>
+        <rect width="248.32" height="37.8786" rx="18.9393" transform="matrix(-0.707107 -0.707107 -0.707107 0.707107 362.091 443.342)"/>
+        <rect x="392" y="429.945" width="147" height="35" transform="rotate(-45 392 429.945)"/>
+      </g>
+    </symbol>
+  </svg>
+
+  <script src="common.js"></script>
+  <script src="menu.js"></script>
+  <script src="hero.js"></script>
+  <script type="module" src="bg.js"></script>
+  <script src="blocks.js"></script>
+  <script src="services.js"></script>
+  <script src="works-data.js"></script>
+  <script src="works.js"></script>
+  <script type="module" src="works-wall.js"></script>
+  <script src="tech-text.js"></script>
+  <script src="wire.js"></script>
+  <script src="faq.js"></script>
+  <script src="final.js"></script>
+  <script src="pixels.js"></script>
+</body>
+</html>

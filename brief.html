@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Бриф на проект: Simple</title>
+  <meta name="description" content="Расскажите о задаче своими словами: сайт, бот, автоматизация или свой сервис. Мы зададим только нужные вопросы и подготовим основу для первого этапа" />
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="page-brief">
+  <a class="skip" href="#brief">К форме</a>
+
+  <header class="hdr" id="hdr">
+    <a class="brand" href="index.html" aria-label="Simple, на главную">
+      <span class="brand-ico" data-knife aria-hidden="true"></span>
+      simple
+    </a>
+    <nav class="nav" aria-label="Разделы">
+      <a href="index.html#how">Как работаем</a>
+      <a href="index.html#services">Что делаем</a>
+      <a href="works.html">Работы</a>
+      <a href="index.html#pricing">Цена</a>
+      <a href="index.html#faq">Вопросы</a>
+    </nav>
+    <div class="hdr-right">
+      <a class="hdr-phone" href="tel:+79255558290">+7&nbsp;925&nbsp;555-82-90</a>
+      <button class="burger" type="button" aria-expanded="false" aria-controls="menu" aria-label="Открыть меню"><i></i><i></i><i></i></button>
+    </div>
+    <!-- на телефоне шагов слева нет: сколько заполнено, показывает полоска под шапкой -->
+    <span class="bt-topbar" aria-hidden="true"><i data-progress-fill></i></span>
+  </header>
+
+  <main id="main">
+    <!-- Первый экран брифа: за заголовком фон «FaultyTerminal» (terminal.js), поле лаймовых символов, как на старом терминале -->
+    <section class="bt-hero" data-reveal>
+      <div class="bt-term" data-terminal aria-hidden="true"></div>
+      <div class="wrap bt-hero-in">
+        <p class="bt-eyebrow rv" style="--d:0ms">Бриф на проект</p>
+        <h1 class="h1 bt-h1">
+          <span class="ln"><span style="--d:80ms">Превратим вашу идею</span></span>
+          <span class="ln"><span style="--d:200ms" class="accent">в понятное ТЗ</span></span>
+        </h1>
+        <p class="lead bt-lead rv" style="--d:340ms">
+          Вы рассказываете о задаче своими словами. Мы зададим только нужные вопросы и подготовим основу для первого этапа
+        </p>
+        <ul class="bt-facts rv" style="--d:460ms">
+          <li>Пять-шесть вопросов и контакт</li>
+          <li>Файлы по желанию</li>
+          <li>Ответы не пропадут, если закрыть вкладку</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="bt-body" data-reveal>
+      <div class="wrap bt-grid">
+        <!-- слева шаги: какой сейчас на экране, какие уже заполнены, и сколько процентов готово -->
+        <aside class="bt-aside rv" style="--d:200ms">
+          <nav class="bt-steps" aria-label="Шаги брифа">
+            <p class="bt-steps-cap"><span>Заполнено</span><b data-progress>0%</b></p>
+            <span class="bt-steps-bar" aria-hidden="true"><i data-progress-fill></i></span>
+            <ol>
+              <li><a href="#step-type" data-step-link="type"><i><span>01</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5 6.5 11.5 12.5 5" /></svg></i>Задача</a></li>
+              <li><a href="#step-questions" data-step-link="questions"><i><span>02</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5 6.5 11.5 12.5 5" /></svg></i>Вопросы</a></li>
+              <li><a href="#step-files" data-step-link="files"><i><span>03</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5 6.5 11.5 12.5 5" /></svg></i>Материалы</a></li>
+              <li><a href="#step-contacts" data-step-link="contacts"><i><span>04</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5 6.5 11.5 12.5 5" /></svg></i>Сроки и контакты</a></li>
+              <li><a href="#step-rules" data-step-link="rules"><i><span>05</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5 6.5 11.5 12.5 5" /></svg></i>Правила и отправка</a></li>
+            </ol>
+          </nav>
+        </aside>
+
+        <div class="bt-main">
+          <p class="bt-restored" data-restored hidden>
+            <span data-restored-text>Вернули ответы, которые вы начали заполнять</span>
+            <button type="button">Начать заново</button>
+          </p>
+
+          <form id="brief" novalidate>
+            <section class="bt-step" id="step-type">
+              <header class="bt-step-head">
+                <span class="bt-no">01</span>
+                <h2>Что нужно сделать</h2>
+                <p>Выберите, что ближе всего. Вопросы ниже подстроятся под задачу</p>
+              </header>
+              <div class="bt-types" data-types role="group" aria-label="Тип задачи"></div>
+            </section>
+
+            <section class="bt-step" id="step-questions">
+              <header class="bt-step-head">
+                <span class="bt-no">02</span>
+                <h2 data-q-heading>Расскажите про сайт</h2>
+                <p data-q-lead></p>
+              </header>
+              <div class="bt-fields" data-main></div>
+              <div class="bt-more" data-more>
+                <div class="bt-more-head">
+                  <div>
+                    <b>Есть детали, которые важно учесть?</b>
+                    <span>Необязательно, но с ними ТЗ получится точнее</span>
+                  </div>
+                  <button type="button" class="bt-more-toggle" data-more-toggle aria-expanded="false" aria-controls="bt-extra">
+                    <span data-more-label>Уточнить детали</span><i class="bt-plus" aria-hidden="true"></i>
+                  </button>
+                </div>
+                <div class="bt-more-body" id="bt-extra"><div class="bt-more-in"><div class="bt-fields" data-extra></div></div></div>
+              </div>
+            </section>
+
+            <section class="bt-step" id="step-files">
+              <header class="bt-step-head">
+                <span class="bt-no">03</span>
+                <h2>Материалы</h2>
+                <p>Файлы объясняют задачу быстрее любого описания. Прикладывайте что есть, необязательно всё</p>
+              </header>
+              <div class="bt-highlight" data-files-highlight hidden>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="13" height="14" rx="3" /><path d="m16 10 5-3v10l-5-3" /></svg>
+                <p></p>
+              </div>
+              <div class="bt-hintbox">
+                <b>Что полезно приложить</b>
+                <ul class="bt-chips" data-files-items></ul>
+                <p class="bt-privacy" data-files-privacy hidden></p>
+              </div>
+              <label class="bt-drop" data-dropzone>
+                <input class="bt-drop-input" type="file" multiple data-file-input />
+                <span class="bt-drop-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 16V5m0 0-4 4m4-4 4 4M5 15v2.5A1.5 1.5 0 0 0 6.5 19h11a1.5 1.5 0 0 0 1.5-1.5V15" /></svg></span>
+                <b>Перетащите файлы сюда или нажмите, чтобы выбрать</b>
+                <span>PDF, Word, Excel, CSV, изображения, ZIP, видео. До 50&nbsp;МБ на файл</span>
+              </label>
+              <ul class="bt-files" data-filelist></ul>
+            </section>
+
+            <section class="bt-step" id="step-contacts">
+              <header class="bt-step-head">
+                <span class="bt-no">04</span>
+                <h2>Сроки и контакты</h2>
+                <p>Последний шаг с ответами. Без контакта мы не сможем ответить</p>
+              </header>
+              <div class="bt-fields" data-closing></div>
+              <fieldset class="bt-methods-wrap">
+                <legend>Как удобнее связаться?</legend>
+                <div class="bt-methods" data-methods></div>
+              </fieldset>
+              <div class="bt-field bt-contact" data-contact data-for="contact"></div>
+            </section>
+
+            <section class="bt-step" id="step-rules">
+              <header class="bt-step-head">
+                <span class="bt-no">05</span>
+                <h2>Как считаются правки</h2>
+                <p>Чтобы потом не было расхождений в ожиданиях</p>
+              </header>
+              <div class="bt-rules">
+                <b>Правила простые</b>
+                <ul data-rules></ul>
+              </div>
+              <label class="bt-check-row">
+                <input type="checkbox" data-consent />
+                <span class="bt-box" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3.5 8.5 6.5 11.5 12.5 5" /></svg></span>
+                <span>Понимаю: объём этапа фиксируется до старта, а новые функции и изменения логики идут следующими этапами</span>
+              </label>
+              <label class="bt-check-row">
+                <input type="checkbox" data-privacy />
+                <span class="bt-box" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3.5 8.5 6.5 11.5 12.5 5" /></svg></span>
+                <span>Согласен на обработку моих персональных данных на условиях <a href="https://simplemind.ru/privacy">политики обработки персональных данных</a></span>
+              </label>
+              <div class="bt-submit">
+                <button type="submit" class="btn btn-lime" data-submit>
+                  <span class="btn-knife" data-knife aria-hidden="true"></span>
+                  Отправить ТЗ
+                </button>
+                <p class="bt-note" data-note role="status" aria-live="polite"></p>
+              </div>
+            </section>
+          </form>
+
+          <!-- после настоящего сохранения на сервере форма сменяется этим блоком -->
+          <section class="bt-done" data-done hidden tabindex="-1">
+            <svg class="bt-done-mark" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="29" /><path d="M20 33.5 28.5 42 45 24" /></svg>
+            <h2 class="h2">Получили</h2>
+            <p>Изучим ответы и вернёмся с предварительным ТЗ и сроками первого этапа. Если что-то будет непонятно, уточним точечно, а не заново</p>
+            <p class="bt-done-id" data-done-id></p>
+            <a class="btn btn-line" href="index.html">На главную <span class="btn-knife" data-knife aria-hidden="true"></span></a>
+          </section>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="ftr">
+    <div class="wrap">
+      <div class="ftr-top">
+        <div class="ftr-brand">
+          <a class="brand" href="index.html" aria-label="Simple, на главную">
+            <span class="brand-ico" data-knife aria-hidden="true"></span>
+            simple
+          </a>
+          <p class="ftr-tag">Ваш IT-офис по подписке</p>
+        </div>
+        <nav class="ftr-nav" aria-label="Разделы внизу страницы">
+          <a href="index.html#how">Как работаем</a>
+          <a href="index.html#services">Что делаем</a>
+          <a href="works.html">Работы</a>
+          <a href="index.html#pricing">Цена</a>
+          <a href="index.html#faq">Вопросы</a>
+        </nav>
+        <div class="ftr-contacts">
+          <a class="ftr-phone" href="tel:+79255558290">+7&nbsp;925&nbsp;555-82-90</a>
+          <a href="mailto:info@simplemind.ru">info@simplemind.ru</a>
+          <a href="https://t.me/simple_ai_team" target="_blank" rel="noopener">Telegram @simple_ai_team</a>
+        </div>
+      </div>
+      <div class="ftr-bottom">
+        <p>ИП Вязгин · ОГРНИП 304280112700192 · ИНН 280100638001</p>
+        <a href="https://simplemind.ru/privacy">Политика обработки персональных данных</a>
+        <p>© 2026 Simple · Твой швейцарский нож в бизнесе</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="common.js"></script>
+  <script src="menu.js"></script>
+  <script src="blocks.js"></script>
+  <script src="brief-data.js"></script>
+  <script src="brief.js"></script>
+  <script src="terminal.js"></script>
+</body>
+</html>
