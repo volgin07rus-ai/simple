@@ -24,6 +24,15 @@
   --ease-in-quart:cubic-bezier(.5,0,.75,0);
 }
 
+/* блок за пределами экрана: его анимации по кругу стоят (common.js) */
+.is-offscreen,.is-offscreen *{ animation-play-state:paused !important }
+/* Облегчённый режим для слабых компьютеров (common.js включает его, если кадры стабильно не успевают).
+   Фоны на холстах сами переходят на плотность 1 и 20 кадров в секунду; здесь стоят пятна света,
+   шапка без размытия под собой, а появления блоков без размытия: только прозрачность и сдвиг */
+.lite .aurora{ animation:none }
+.lite .hdr.is-scrolled{ -webkit-backdrop-filter:none; backdrop-filter:none; background:rgba(7,8,7,.95) }
+.lite *:not(.drift-wall__tile img){ filter:none !important }
+
 /* ============ rem-сетка ============ */
 html{ font-size:clamp(12px,1.1111vw,19px) }
 @media (max-width:1024px){ html{ font-size:1.5625vw } }
@@ -247,12 +256,15 @@ html::-webkit-scrollbar{ display:none }
           mask-image:radial-gradient(ellipse 75% 70% at 50% 45%, #000 20%, transparent 80%);
   opacity:.6;
 }
-.aurora{ position:absolute; border-radius:50%; filter:blur(5rem); opacity:.55; will-change:transform }
-.a1{ width:46rem; height:30rem; right:-8rem; top:-6rem;
-  background:radial-gradient(closest-side, rgba(196,236,26,.45), rgba(196,236,26,0));
+/* Мягкие пятна света. Раньше их размывал filter:blur(5rem), и видеокарта пересчитывала размытие каждый кадр
+   движения: на ретине со встроенной графикой это одна из самых дорогих вещей на странице. Теперь мягкость
+   даёт сам градиент с плавным спадом, а пятно на треть больше, как было с размытием */
+.aurora{ position:absolute; border-radius:50%; opacity:.55; will-change:transform }
+.a1{ width:60rem; height:42rem; right:-15rem; top:-12rem;
+  background:radial-gradient(closest-side, rgba(196,236,26,.4), rgba(196,236,26,.26) 30%, rgba(196,236,26,.1) 62%, rgba(196,236,26,0));
   animation:drift1 22s ease-in-out infinite alternate }
-.a2{ width:34rem; height:22rem; right:14rem; bottom:-10rem;
-  background:radial-gradient(closest-side, rgba(64,190,210,.28), rgba(64,190,210,0));
+.a2{ width:46rem; height:32rem; right:8rem; bottom:-15rem;
+  background:radial-gradient(closest-side, rgba(64,190,210,.25), rgba(64,190,210,.16) 30%, rgba(64,190,210,.06) 62%, rgba(64,190,210,0));
   animation:drift2 26s ease-in-out infinite alternate }
 @keyframes drift1{ to{ transform:translate(-6rem,4rem) scale(1.1) } }
 @keyframes drift2{ to{ transform:translate(5rem,-3rem) scale(.92) } }
@@ -303,6 +315,15 @@ html::-webkit-scrollbar{ display:none }
   transform:rotateX(var(--rx)) rotateY(var(--ry));
   will-change:transform;
 }
+/* Покачивание панели на телефоне (hero.js ставит класс is-sway). Его ведёт видеокарта, основному потоку
+   кадры не нужны. Две оси с разными периодами: наклон вперёд-назад на ±3°, поворот вбок на ±6°.
+   Отрицательная задержка запускает обе с середины хода, то есть ровно с того положения, где панель стоит */
+.tilt.is-sway{ animation:sway-x 7.85s ease-in-out -3.925s infinite alternate, sway-y 6.3s ease-in-out -3.15s infinite alternate }
+@keyframes sway-x{ from{ transform:rotateX(3deg) rotateY(-14deg) } to{ transform:rotateX(9deg) rotateY(-14deg) } }
+@keyframes sway-y{ from{ rotate:y -6deg } to{ rotate:y 6deg } }
+@media (max-width:640px){
+  @keyframes sway-x{ from{ transform:rotateX(2deg) rotateY(-8deg) } to{ transform:rotateX(8deg) rotateY(-8deg) } }
+}
 .panel{
   position:relative; width:38.75em; margin-left:1.6em;
   transform-style:preserve-3d;
@@ -314,9 +335,11 @@ html::-webkit-scrollbar{ display:none }
     0 0 0 1px rgba(216,255,50,.05),
     inset 0 1px 0 rgba(255,255,255,.07);
 }
-.glare{
-  position:absolute; inset:0; border-radius:inherit; pointer-events:none;
-  background:radial-gradient(28em circle at var(--gx,30%) var(--gy,20%), rgba(255,255,255,.07), transparent 60%);
+/* блик: круг света, который hero.js двигает сдвигом за курсором; панель при этом не перерисовывается */
+.glare{ position:absolute; inset:0; border-radius:inherit; pointer-events:none; overflow:hidden }
+.glare i{
+  position:absolute; left:0; top:0; width:56em; height:56em; margin:-28em 0 0 -28em;
+  background:radial-gradient(closest-side, rgba(255,255,255,.07), transparent 60%); will-change:transform;
 }
 
 .p-head{
@@ -609,8 +632,9 @@ html::-webkit-scrollbar{ display:none }
   --rx:0deg; --ry:0deg; --gx:30%; --gy:20%;
   position:relative; overflow:hidden;
   border-radius:1.25rem; border:1px solid var(--line-2);
+  /* размытия фона под стеклом нет: за карточками ровный тёмный фон, размывать нечего, а видеокарта
+     пересчитывала размытие каждый кадр, пока внутри карточки что-то двигалось */
   background:linear-gradient(180deg, rgba(24,27,22,.72), rgba(12,14,11,.62));
-  -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);
   box-shadow:0 2.4rem 4.5rem -2rem rgba(0,0,0,.85), 0 0 0 1px rgba(216,255,50,.04), inset 0 1px 0 rgba(255,255,255,.07);
   transform:rotateX(var(--rx)) rotateY(var(--ry));
   transition:border-color .7s var(--ease-quart);

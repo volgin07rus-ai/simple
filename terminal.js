@@ -180,11 +180,12 @@ void main(){
 
     const mouse = { x: 0.5, y: 0.5 }, smooth = { x: 0.5, y: 0.5 }
     const offset = Math.random() * 100
-    let raf = 0, visible = false, frame = 0, lastMove = 0, loadStart = 0
+    let raf = 0, timer = 0, visible = false, lastMove = 0, loadStart = 0, drawnAt = -1e9
+    const lite = () => document.documentElement.classList.contains('lite')
 
     function resize() {
       // символы крупные и светятся: плотности полтора хватает, а точек втрое меньше, чем на ретине в полную силу
-      const dpr = Math.min(devicePixelRatio || 1, 1.5)
+      const dpr = Math.min(devicePixelRatio || 1, lite() ? 1 : 1.5)
       canvas.width = Math.max(1, Math.round(host.clientWidth * dpr))
       canvas.height = Math.max(1, Math.round(host.clientHeight * dpr))
       // Клетка символа одного размера на любом экране (24 пикселя): в оригинале сетка всегда 45 клеток
@@ -238,23 +239,32 @@ void main(){
     function tick(now) {
       raf = 0
       if (!visible || document.hidden || reduce) return
-      // мышь стоит или это телефон: узор меняется медленно, хватает каждого второго кадра
-      frame++
+      // Мышь стоит или это телефон: узор меняется медленно, хватает 30 кадров в секунду (на слабом компьютере 20).
+      // Следующий такой кадр заказываем таймером: страница не просыпается на каждом обновлении экрана
       const loading = now - loadStart < 2100
-      if (!loading && (touch || now - lastMove > 1500) && frame % 2) { raf = requestAnimationFrame(tick); return }
-      draw(now)
-      raf = requestAnimationFrame(tick)
+      const idle = !loading && (touch || now - lastMove > 1500)
+      const gap = idle ? (lite() ? 1000 / 20 : 1000 / 30) : 1000 / 60
+      if (now - drawnAt >= gap * 0.7) { drawnAt = now; draw(now) }
+      if (idle) timer = setTimeout(() => { timer = 0; raf = requestAnimationFrame(tick) }, gap - 8)
+      else raf = requestAnimationFrame(tick)
     }
-    const kick = () => { if (!raf && visible && !reduce) raf = requestAnimationFrame(tick) }
+    const kick = () => {
+      if (!visible || reduce) return
+      if (timer) { clearTimeout(timer); timer = 0 }
+      if (!raf) raf = requestAnimationFrame(tick)
+    }
 
     resize()
     new ResizeObserver(resize).observe(host)
+    addEventListener('simple:lite', resize)
     new IntersectionObserver(([e]) => { visible = e.isIntersecting; kick() }).observe(host)
     document.addEventListener('visibilitychange', kick)
     addEventListener('mousemove', e => {
       const r = host.getBoundingClientRect()
       mouse.x = (e.clientX - r.left) / r.width
       mouse.y = 1 - (e.clientY - r.top) / r.height
+      // мышь двинулась после паузы: сразу полная частота кадров
+      if (performance.now() - lastMove > 1500) kick()
       lastMove = performance.now()
     }, { passive: true })
     canvas.addEventListener('webglcontextlost', e => { e.preventDefault(); cancelAnimationFrame(raf); visible = false })

@@ -16,17 +16,26 @@
   setTimeout(start, 3000)
 
   /* ---------- 3D-наклон панели за курсором ---------- */
+  // Наклон ставим прямо в transform, а блик двигаем сдвигом: так кадр не пересчитывает стили всей панели
+  // и не перерисовывает её, работает только видеокарта. Цикл крутится, пока первый экран виден и панель
+  // ещё движется; остановилась или ушла с экрана, и страница перестаёт тратить на неё кадры
   const tilt = document.getElementById('tilt')
   const panel = tilt.querySelector('.panel')
+  const glare = document.createElement('i')
+  panel.querySelector('.glare')?.append(glare)
+  const spot = hero.querySelector('.spot')
   const narrow = innerWidth <= 640
   const base = narrow ? { rx: 5, ry: -8 } : { rx: 6, ry: -14 }
   const cur = { rx: 22, ry: -34, gx: 30, gy: 20 }   // стартовый разворот, панель «доворачивается» при появлении
   const target = { rx: base.rx, ry: base.ry, gx: 30, gy: 20 }
+  let heroOn = true, raf = 0, lastTilt = '', lastGlare = '', panelW = 0, panelH = 0
+  new ResizeObserver(() => { panelW = panel.offsetWidth; panelH = panel.offsetHeight; lastGlare = ''; wake() }).observe(panel)
 
   if (reduce) { cur.rx = base.rx; cur.ry = base.ry }
 
   if (finePointer && !reduce) {
     addEventListener('pointermove', e => {
+      if (!heroOn) return
       const nx = e.clientX / innerWidth * 2 - 1   // -1..1
       const ny = e.clientY / innerHeight * 2 - 1
       // Курсор отталкивает панель: сторона, к которой он ближе, уходит вглубь
@@ -34,11 +43,16 @@
       target.rx = base.rx - ny * 7
       target.gx = 50 + nx * 40
       target.gy = 40 + ny * 40
-      hero.style.setProperty('--mx', e.clientX + 'px')
-      hero.style.setProperty('--my', e.clientY + 'px')
+      // пятно света под курсором видно только без поля фигур; переменные у самого пятна, а не у всего экрана
+      if (spot && !hero.classList.contains('has-waves')) {
+        spot.style.setProperty('--mx', e.clientX + 'px')
+        spot.style.setProperty('--my', e.clientY + 'px')
+      }
+      wake()
     })
     document.addEventListener('pointerleave', () => {
       target.rx = base.rx; target.ry = base.ry
+      wake()
     })
   }
 
@@ -69,6 +83,7 @@
       gyro.nx = Math.max(-1, Math.min(1, (x - zero.x) / 16))
       gyro.ny = Math.max(-1, Math.min(1, (y - zero.y) / 16))
       gyro.on = true
+      wake()
     })
     // iPhone отдаёт датчики только с разрешения, а спросить его можно лишь в ответ на касание:
     // просим при первом касании первого экрана, мимо кнопок и ссылок
@@ -83,35 +98,58 @@
     }
   }
 
-  let t0 = performance.now()
+  // На тач-устройствах курсора нет: панель медленно покачивается сама. Покачивание ведёт CSS-анимация
+  // (класс is-sway): её двигает видеокарта, и основному потоку не нужно считать кадры. Раньше качал этот цикл,
+  // и браузер каждый кадр заново собирал слои 3D-сцены. Если у телефона есть датчик, панель ведёт он:
+  // телефон поворачивают, а панель сохраняет своё положение и видна под другим углом.
+  // На слабом телефоне (облегчённый режим) панель сама не качается, только от датчика
+  const swaying = !finePointer && !reduce
+  function takeSway() {
+    // покачивание сменяется датчиком: стартуем с того наклона, где панель сейчас, без скачка
+    for (const a of tilt.getAnimations()) {
+      const p = a.effect.getComputedTiming().progress ?? 0.5
+      if (a.animationName === 'sway-x') cur.rx = base.rx - 3 + 6 * p
+      if (a.animationName === 'sway-y') cur.ry = base.ry - 6 + 12 * p
+    }
+    tilt.classList.remove('is-sway')
+  }
   function frame(now) {
-    if (!finePointer && !reduce) {
-      // На тач-устройствах курсора нет: панель медленно покачивается сама,
-      // а если есть датчик, поворот телефона разворачивает её в обратную сторону
-      const t = (now - t0) / 1000
-      const sway = gyro.on ? 0.4 : 1
-      target.ry = base.ry + Math.sin(t * 0.5) * 6 * sway - gyro.nx * 11
-      target.rx = base.rx + Math.cos(t * 0.4) * 3 * sway + gyro.ny * 7
-      if (gyro.on) {
-        // свет скользит к краю, который поднялся навстречу
-        target.gx = 50 + gyro.nx * 40
-        target.gy = 40 + gyro.ny * 40
-      }
+    raf = 0
+    if (!heroOn || document.hidden) return
+    const lite = document.documentElement.classList.contains('lite')
+    if (swaying && gyro.on) {
+      if (tilt.classList.contains('is-sway')) takeSway()
+      target.ry = base.ry - gyro.nx * 11
+      target.rx = base.rx + gyro.ny * 7
+      // свет скользит к краю, который поднялся навстречу
+      target.gx = 50 + gyro.nx * 40
+      target.gy = 40 + gyro.ny * 40
     }
     const k = started ? 0.05 : 0
     cur.rx += (target.rx - cur.rx) * k
     cur.ry += (target.ry - cur.ry) * k
     cur.gx += (target.gx - cur.gx) * 0.08
     cur.gy += (target.gy - cur.gy) * 0.08
-    tilt.style.setProperty('--rx', cur.rx.toFixed(3) + 'deg')
-    tilt.style.setProperty('--ry', cur.ry.toFixed(3) + 'deg')
-    panel.style.setProperty('--gx', cur.gx.toFixed(1) + '%')
-    panel.style.setProperty('--gy', cur.gy.toFixed(1) + '%')
-    requestAnimationFrame(frame)
+    paintTilt()
+    const settled = started && Math.abs(target.rx - cur.rx) + Math.abs(target.ry - cur.ry) <= 0.01 && Math.abs(target.gx - cur.gx) + Math.abs(target.gy - cur.gy) <= 0.05
+    // панель встала после заставки, датчика нет: дальше её качает CSS
+    if (swaying && settled && !gyro.on && !lite) tilt.classList.add('is-sway')
+    else if (tilt.classList.contains('is-sway') && lite) tilt.classList.remove('is-sway')
+    if ((swaying && gyro.on) || !settled) raf = requestAnimationFrame(frame)
   }
-  tilt.style.setProperty('--rx', cur.rx + 'deg')
-  tilt.style.setProperty('--ry', cur.ry + 'deg')
-  requestAnimationFrame(frame)
+  function paintTilt() {
+    const t = `rotateX(${cur.rx.toFixed(2)}deg) rotateY(${cur.ry.toFixed(2)}deg)`
+    if (t !== lastTilt) { tilt.style.transform = t; lastTilt = t }
+    // центр блика в точке (gx%, gy%) панели
+    const g = `translate3d(${(cur.gx / 100 * panelW).toFixed(1)}px, ${(cur.gy / 100 * panelH).toFixed(1)}px, 0)`
+    if (g !== lastGlare) { glare.style.transform = g; lastGlare = g }
+  }
+  function wake() { if (!raf && heroOn && !document.hidden) raf = requestAnimationFrame(frame) }
+  new IntersectionObserver(([e]) => { heroOn = e.isIntersecting; wake() }).observe(hero)
+  document.addEventListener('visibilitychange', wake)
+  addEventListener('simple:lite', wake)
+  paintTilt()
+  wake()
 
   /* ---------- Заставка: логотип появляется над панелью и садится в её шапку ---------- */
   // Логотип всё время внутри панели: наклоняется и прокручивается вместе с ней, никуда не улетает
@@ -188,7 +226,8 @@
       return new Promise(res => {
         const s = performance.now()
         const step = now => {
-          const p = Math.min(1, (now - s) / ms)
+          // первый экран ушёл с экрана: огонёк сразу в конце пути, без кадров, которых никто не увидит
+          const p = visible && !document.hidden ? Math.min(1, (now - s) / ms) : 1
           const e = p < .5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2
           const pt = path.getPointAtLength(e * L)
           pulse.setAttribute('cx', pt.x)

@@ -16,11 +16,15 @@
   const make = (tag, cls) => { const el = document.createElementNS(NS, tag); el.setAttribute('class', cls); return el }
   const svg = make('svg', 'wire')
   svg.setAttribute('aria-hidden', 'true')
-  const track = make('path', 'wire-track'), lit = make('path', 'wire-lit')
+  // Лаймовая часть собрана из отдельных отрезков трассы. При прокрутке меняется только отрезок, по которому
+  // идёт голова, и браузер перерисовывает узкую полосу вокруг него. Одним путём на всю трассу провод занимал
+  // почти всю страницу, и каждый кадр прокрутки перерисовывался весь экран под ним: на слабых ноутбуках это рывки
+  const track = make('path', 'wire-track'), lit = make('g', 'wire-lit-g')
   const pulse = make('circle', 'wire-pulse'), head = make('circle', 'wire-head')
   pulse.setAttribute('r', 2.4)
   head.setAttribute('r', 3.4)
   svg.append(track, lit, pulse, head)
+  let legs = []   // { el, start, len, mode }
   main.prepend(svg)
 
   // Координаты внутри main по раскладке, без transform: блоки до появления ещё сдвинуты
@@ -70,24 +74,38 @@
     const n = P.length
     const seg = i => Math.hypot(P[i][0] - P[i - 1][0], P[i][1] - P[i - 1][1])
     const rad = P.map((_, i) => (i === 0 || i === n - 1) ? 0 : Math.min(R, seg(i) / 2, seg(i + 1) / 2))
-    let d = `M${P[0][0]} ${P[0][1]}`
+    let d = `M${P[0][0]} ${P[0][1]}`, part = d
+    const parts = []
     for (let i = 1; i < n; i++) {
       const [x, y] = P[i], [px, py] = P[i - 1]
       const len = seg(i), ux = (x - px) / len, uy = (y - py) / len
       const r = rad[i]
-      if (!r) { d += ` L${x} ${y}`; continue }
+      if (!r) { d += ` L${x} ${y}`; parts.push(part + ` L${x} ${y}`); continue }
       const len2 = seg(i + 1), vx = (P[i + 1][0] - x) / len2, vy = (P[i + 1][1] - y) / len2
-      d += ` L${x - ux * r} ${y - uy * r} A${r} ${r} 0 0 ${ux * vy - uy * vx > 0 ? 1 : 0} ${x + vx * r} ${y + vy * r}`
+      const ex = x + vx * r, ey = y + vy * r
+      const piece = ` L${x - ux * r} ${y - uy * r} A${r} ${r} 0 0 ${ux * vy - uy * vx > 0 ? 1 : 0} ${ex} ${ey}`
+      d += piece
+      parts.push(part + piece)   // отрезок кончается сразу за скруглением, следующий начинается там же
+      part = `M${ex} ${ey}`
     }
     track.setAttribute('d', d)
-    lit.setAttribute('d', d)
     svg.setAttribute('width', main.clientWidth)
     svg.setAttribute('height', main.offsetHeight)
+    while (legs.length < parts.length) { const el = make('path', 'wire-lit'); lit.append(el); legs.push({ el }) }
+    while (legs.length > parts.length) legs.pop().el.remove()
+    let acc = 0
+    legs.forEach((leg, i) => {
+      leg.el.setAttribute('d', parts[i])
+      leg.len = leg.el.getTotalLength()
+      leg.start = acc
+      leg.mode = ''
+      acc += leg.len
+    })
 
     // длина пути в каждой точке (середина скругления), подгоняем под длину, которую считает браузер
     L = [0]
     for (let i = 1; i < n; i++) L.push(L[i - 1] + seg(i) - rad[i - 1] - rad[i] + Math.PI / 4 * (rad[i - 1] + rad[i]))
-    total = lit.getTotalLength()
+    total = acc
     const k = total / L[n - 1]
     L = L.map(v => v * k)
 
@@ -104,7 +122,6 @@
     for (let i = 1; i < n; i++) K[i] = Math.max(K[i], K[i - 1] + seg(i) * 0.2)
 
     top = main.getBoundingClientRect().top + scrollY
-    lit.style.strokeDasharray = `${total} ${total + 10}`
     shown = Math.min(shown, total)
     if (reduce) { shown = target = total; paint(); return }
     target = lengthAt(scrollY + innerHeight * READ - top)
@@ -121,12 +138,29 @@
   }
 
   const ease = t => t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2
+  // отрезок целиком горит, целиком спрятан или горит частично; стиль меняем, только когда состояние сменилось
+  function setMode(leg, mode) {
+    if (leg.mode === mode) return
+    leg.mode = mode
+    leg.el.style.visibility = mode === 'none' ? 'hidden' : ''
+    leg.el.style.strokeDasharray = mode === 'part' ? `${leg.len} ${leg.len + 10}` : ''
+    if (mode !== 'part') leg.el.style.strokeDashoffset = ''
+  }
+  function pointAt(len) {
+    const leg = legs.find(l => len <= l.start + l.len) || legs[legs.length - 1]
+    return leg.el.getPointAtLength(Math.max(0, Math.min(leg.len, len - leg.start)))
+  }
   function paint(now) {
-    lit.style.strokeDashoffset = total - shown
+    for (const leg of legs) {
+      const local = shown - leg.start
+      if (local >= leg.len - 0.01) setMode(leg, 'full')
+      else if (local <= 0) setMode(leg, 'none')
+      else { setMode(leg, 'part'); leg.el.style.strokeDashoffset = leg.len - local }
+    }
     const live = shown > 1 && shown < total - 1
     head.classList.toggle('is-on', live)
     if (live) {
-      const pt = lit.getPointAtLength(shown)
+      const pt = pointAt(shown)
       head.setAttribute('cx', pt.x)
       head.setAttribute('cy', pt.y)
     }
@@ -142,7 +176,7 @@
       if (t >= 1) pulseAt = -1
       else {
         const from = Math.max(0, shown - 560)
-        const pt = lit.getPointAtLength(from + (shown - from) * ease(t))
+        const pt = pointAt(from + (shown - from) * ease(t))
         pulse.setAttribute('cx', pt.x)
         pulse.setAttribute('cy', pt.y)
         pulse.style.opacity = Math.min(1, t / 0.15, (1 - t) / 0.25)
@@ -169,7 +203,7 @@
     // импульс запускаем, только когда голова провода на экране
     setInterval(() => {
       if (document.hidden || shown < 120 || shown >= total - 1) return
-      const y = lit.getPointAtLength(shown).y + top - scrollY
+      const y = pointAt(shown).y + top - scrollY
       if (y < 0 || y > innerHeight) return
       pulseAt = performance.now()
       if (!raf) raf = requestAnimationFrame(frame)

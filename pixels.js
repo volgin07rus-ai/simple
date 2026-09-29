@@ -225,7 +225,7 @@ void main(){
     const clickTimes = new Float32Array(MAX_CLICKS)
     const trail = new Float32Array(MAX_TRAIL * 3).fill(-1)
     let clickIx = 0, trailIx = 0, dpr = 1, lastX = -1e4, lastY = -1e4, lastAt = 0
-    let hotUntil = 0, dirty = true, dead = false
+    let hotUntil = 0, dirty = true, dead = false, drawnAt = -1e9
     const offset = Math.random() * 1000
     const t0 = performance.now()
     const clock = now => (now - t0) / 1000
@@ -234,7 +234,9 @@ void main(){
     canvas.addEventListener('webglcontextlost', e => { e.preventDefault(); dead = true })
 
     function resize() {
-      dpr = Math.min(devicePixelRatio || 1, 2)
+      // Плотность не выше 1,5: пиксельный узор на ретине выглядит так же, а точек почти вдвое меньше,
+      // на слабом компьютере (класс lite) плотность 1
+      dpr = Math.min(devicePixelRatio || 1, document.documentElement.classList.contains('lite') ? 1 : 1.5)
       const w = Math.max(1, Math.round(host.clientWidth * dpr)), h = Math.max(1, Math.round(host.clientHeight * dpr))
       if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h }
       gl.viewport(0, 0, w, h)
@@ -249,7 +251,9 @@ void main(){
     return {
       host,
       visible: false,
+      resize,
       get dead() { return dead },
+      hot: now => now < hotUntil || dirty,
       // след курсора в координатах холста: от левого нижнего угла, в пикселях устройства
       trail(x, y, now) {
         if (Math.hypot(x - lastX, y - lastY) < 5 && now - lastAt < 40) return
@@ -271,11 +275,14 @@ void main(){
         hotUntil = Math.max(hotUntil, now + RIPPLE_LIFE * 1000)
         dirty = true
       },
-      // Рисуем каждый кадр, пока горит след или идёт волна; в покое узор меняется медленно, хватает каждого второго кадра
-      render(now, frame) {
+      // Пока горит след или идёт волна, рисуем до 60 кадров в секунду; в покое узор меняется медленно, хватает 30.
+      // Считаем по времени, а не через кадр: на экране 120 или 165 Гц «через кадр» было бы 60–80 кадров в покое
+      render(now) {
         if (dead) return
         const active = now < hotUntil
-        if (reduce ? !(dirty || active) : !active && frame % 2 && !dirty) return
+        const gap = active ? 1000 / 60 : document.documentElement.classList.contains('lite') ? 1000 / 20 : 1000 / 30
+        if (reduce ? !(dirty || active) : !dirty && now - drawnAt < gap * 0.7) return
+        drawnAt = now
         dirty = false
         gl.uniform1f(U.time, patternTime(now))
         gl.uniform1f(U.now, clock(now))
@@ -305,29 +312,40 @@ void main(){
   }, { rootMargin: '120px 0px' })
   hosts.forEach(h => io.observe(h))
 
-  let raf = 0, frame = 0
+  // Пока горит след, кадр на каждом обновлении экрана; в покое следующий кадр заказываем таймером,
+  // чтобы страница не просыпалась 60–165 раз в секунду ради кадров, которые всё равно пропускаются
+  let raf = 0, timer = 0
   function loop(now) {
     raf = 0
     if (document.hidden) return
-    frame++
-    let any = false
-    live.forEach(l => { if (l.visible && !l.dead) { any = true; l.render(now, frame) } })
-    if (any) raf = requestAnimationFrame(loop)
+    let any = false, hot = false
+    live.forEach(l => { if (l.visible && !l.dead) { any = true; l.render(now); if (l.hot(now)) hot = true } })
+    if (!any) return
+    if (hot) raf = requestAnimationFrame(loop)
+    else timer = setTimeout(() => { timer = 0; raf = requestAnimationFrame(loop) }, (document.documentElement.classList.contains('lite') ? 1000 / 20 : 1000 / 30) - 8)
   }
-  function kick() { if (!raf) raf = requestAnimationFrame(loop) }
+  function kick() {
+    if (timer) { clearTimeout(timer); timer = 0 }
+    if (!raf) raf = requestAnimationFrame(loop)
+  }
   document.addEventListener('visibilitychange', kick)
+  // слабый компьютер (common.js): холсты переходят на плотность 1
+  addEventListener('simple:lite', () => live.forEach(l => l.resize()))
 
   // Курсор и клики слушаем на всём окне: пятна лежат под содержимым, до них самих события не доходят
   const pick = (e, fn) => {
     const now = performance.now()
+    let touched = false
     live.forEach(l => {
       if (!l.visible || l.dead) return
       const r = l.host.getBoundingClientRect()
       const x = e.clientX - r.left, y = e.clientY - r.top
       if (x < -60 || y < -60 || x > r.width + 60 || y > r.height + 60) return
       l[fn](x, y, now)
+      touched = true
     })
-    kick()
+    // курсор далеко от пятен: кадры не нужны
+    if (touched) kick()
   }
   addEventListener('pointermove', e => { if (e.pointerType === 'mouse') pick(e, 'trail') }, { passive: true })
   addEventListener('pointerdown', e => pick(e, 'click'), { passive: true })

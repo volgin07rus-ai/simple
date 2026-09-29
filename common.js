@@ -40,9 +40,51 @@
 
   /* ---------- Шапка: подложка после прокрутки ---------- */
   const hdr = document.getElementById('hdr')
-  const onScroll = () => hdr.classList.toggle('is-scrolled', scrollY > 20)
+  let scrolled = null
+  const onScroll = () => { const v = scrollY > 20; if (v !== scrolled) hdr.classList.toggle('is-scrolled', scrolled = v) }
   addEventListener('scroll', onScroll, { passive: true })
   onScroll()
+
+  /* ---------- Слабый компьютер: облегчённый режим ---------- */
+  // Первые три секунды после загрузки и первые три секунды прокрутки меряем, как часто браузер успевает
+  // рисовать кадры. Если обычный кадр дольше 24 мс (меньше 40 кадров в секунду), включаем облегчённый режим:
+  // класс lite на html и событие simple:lite. Фоны на холстах переходят на плотность 1 и 20 кадров в секунду,
+  // у поля фигур гаснет свечение, линза надписи и пятна света стоят, шапка и появления блоков без размытия.
+  // Так же, если браузер сам просит экономить трафик или сам снизил частоту кадров, как Safari в режиме энергосбережения
+  const root = document.documentElement
+  function goLite() {
+    if (root.classList.contains('lite')) return
+    root.classList.add('lite')
+    dispatchEvent(new Event('simple:lite'))
+  }
+  if (navigator.connection && navigator.connection.saveData) goLite()
+  function probe(ms) {
+    if (root.classList.contains('lite') || document.hidden) return
+    const gaps = []
+    let prev = 0, t0 = 0
+    const step = now => {
+      if (document.hidden) return
+      if (prev) gaps.push(now - prev)
+      prev = now
+      t0 ||= now
+      if (now - t0 < ms) { requestAnimationFrame(step); return }
+      gaps.sort((a, b) => a - b)
+      if (gaps.length > 20 && gaps[gaps.length >> 1] > 24) goLite()
+    }
+    requestAnimationFrame(step)
+  }
+  addEventListener('load', () => setTimeout(() => probe(3000), 1200))
+  addEventListener('scroll', function first() {
+    removeEventListener('scroll', first)
+    setTimeout(() => probe(3000), 200)
+  }, { passive: true })
+
+  /* ---------- Анимации по кругу за пределами экрана стоят ---------- */
+  // Мигающие точки, огоньки по линиям схем, «печатает…» в чате: браузер крутит такие анимации всё время,
+  // даже когда блок далеко за экраном, а огоньки по линиям ещё и пересчитывает основным потоком каждый кадр.
+  // Блок ушёл с экрана, и его анимации замирают; вернулся, и они идут дальше с того же места
+  const sleeper = new IntersectionObserver(entries => entries.forEach(e => e.target.classList.toggle('is-offscreen', !e.isIntersecting)), { rootMargin: '150px 0px' })
+  document.querySelectorAll('main > section').forEach(s => sleeper.observe(s))
 
   /* ---------- Плавный переезд к блоку по ссылкам меню и якорям ---------- */
   // Вместо рывка страница плавно едет к блоку: медленно трогается, разгоняется и мягко встаёт, без отскока.

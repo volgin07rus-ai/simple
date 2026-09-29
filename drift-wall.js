@@ -28,6 +28,7 @@ export function createDriftWall(container, options = {}) {
   let inside = false, active = null, hoveredCol = -1, focus = null
   let raf = 0, last = null, lastHit = 0, visible = false, pointerType = 'mouse', resizeTimer = 0
   let shift = { cur: 0, target: 0 }, tabY = 0, tabAt = -1e9
+  let anims = []   // колонки в покое плывут анимациями браузера (drift), без кадров в JavaScript
 
   container.classList.add('drift-wall')
   container.classList.toggle('drift-wall--reduced', reduced)
@@ -92,6 +93,8 @@ export function createDriftWall(container, options = {}) {
         : `<div ${attrs}${focusable ? ' tabindex="0"' : ''}>${inner}</div>`
     }
 
+    anims.forEach(a => a.cancel())
+    anims = []
     container.innerHTML = `<div class="drift-wall__plane" style="width:${columns * (tileWidth + gap)}px;height:${planeH}px">${
       colItems.map((col, c) => {
         const m = meta[c]
@@ -112,6 +115,7 @@ export function createDriftWall(container, options = {}) {
       const t = container.querySelector(`.drift-wall__tile[data-i="${was}"]:not([tabindex="-1"])`)
       if (t) { t.focus({ preventScroll: true }); activate(t); centerOn(t) }
     }
+    start()
   }
 
   function applyPlane() {
@@ -124,12 +128,14 @@ export function createDriftWall(container, options = {}) {
   /* ---------- Активная плитка ---------- */
   function activate(tile) {
     if (!tile || tile === active) return
+    wake()
     active?.classList.remove('is-active')
     active = tile
     tile.classList.add('is-active')
     hoveredCol = Number(tile.dataset.col)
   }
   function release() {
+    wake()
     active?.classList.remove('is-active')
     active = null
     hoveredCol = -1
@@ -162,6 +168,7 @@ export function createDriftWall(container, options = {}) {
   function centerOn(tile) {
     const c = Number(tile.dataset.col), row = Number(tile.dataset.row), m = meta[c]
     if (!m) return
+    wake()
     const target = row * m.unit + m.unit / 2 - planeH / 2
     let best = offsets[c], dist = Infinity
     for (let n = -m.copies; n <= m.copies; n++) {
@@ -221,12 +228,56 @@ export function createDriftWall(container, options = {}) {
       offsets[c] = off
       tracks[c].style.transform = `translate3d(0, ${-off}px, 0)`
     }
+    if (resting()) { drift(); return }
     raf = requestAnimationFrame(frame)
   }
-  function start() {
+  // Пока курсора на стене нет и всё успокоилось, колонки плывут анимациями браузера: их двигает видеокарта,
+  // а основной поток кадры не считает. Раньше стена каждый кадр ставила колонкам сдвиг из JavaScript,
+  // и браузер каждый кадр заново собирал слои всей страницы; на слабых ноутбуках это заметная доля кадра.
+  // Курсор на стене, фокус, касание: колонки забирает прежний цикл, с наклоном и остановкой под курсором
+  const period = c => meta[c].copyHeight / Math.abs(baseVel[c]) * 1000
+  function resting() {
+    if (inside || focus || hoveredCol >= 0 || !tracks.length) return false
+    if (reduced) return true   // без движения стене в покое кадры не нужны вовсе
+    if (Math.abs(damped.x) + Math.abs(damped.y) > 0.02 || Math.abs(shift.cur) > 0.5 || shift.target) return false
+    return velocities.every((v, c) => Math.abs(v - baseVel[c]) < 0.5)
+  }
+  function drift() {
+    if (anims.length || !visible || reduced || !tracks.length) return
+    damped = { x: 0, y: 0 }; shift.cur = 0
+    applyPlane()
+    anims = tracks.map((t, c) => {
+      const h = meta[c].copyHeight, up = baseVel[c] > 0
+      const a = t.animate([{ transform: `translate3d(0, ${up ? 0 : -h}px, 0)` }, { transform: `translate3d(0, ${up ? -h : 0}px, 0)` }],
+        { duration: period(c), iterations: Infinity, easing: 'linear' })
+      const frac = offsets[c] / h
+      a.currentTime = (up ? frac : 1 - frac) * period(c)
+      return a
+    })
+  }
+  // обратно в цикл: сдвиг каждой колонки берём у её анимации, скорость та же, рывка нет
+  function hold() {
+    if (!anims.length) return
+    anims.forEach((a, c) => {
+      const h = meta[c].copyHeight, dur = period(c)
+      const frac = (((a.currentTime ?? 0) % dur) + dur) % dur / dur
+      offsets[c] = (baseVel[c] > 0 ? frac : 1 - frac) * h
+      velocities[c] = baseVel[c]
+      tracks[c].style.transform = `translate3d(0, ${-offsets[c]}px, 0)`
+      a.cancel()
+    })
+    anims = []
+  }
+  function wake() {
+    hold()
     if (raf || !visible) return
     last = null
     raf = requestAnimationFrame(frame)
+  }
+  function start() {
+    if (!visible || raf) return
+    if (resting()) drift()
+    else wake()
   }
 
   /* ---------- События ---------- */
@@ -234,6 +285,7 @@ export function createDriftWall(container, options = {}) {
     pointerType = e.pointerType
     if (e.pointerType === 'touch') return
     inside = true
+    wake()
     client = { x: e.clientX, y: e.clientY }
     if (o.parallax > 0 && !reduced) {
       const r = container.getBoundingClientRect()
@@ -332,6 +384,7 @@ export function createDriftWall(container, options = {}) {
   // Вне экрана стена не считает кадры
   const io = new IntersectionObserver(([entry]) => {
     visible = entry.isIntersecting
+    anims.forEach(a => (visible ? a.play() : a.pause()))
     if (visible) start()
     else if (pointerType === 'touch') release()
   }, { rootMargin: '120px 0px' })
@@ -343,6 +396,7 @@ export function createDriftWall(container, options = {}) {
     rebuild: build,
     destroy() {
       cancelAnimationFrame(raf)
+      anims.forEach(a => a.cancel())
       clearTimeout(resizeTimer)
       io.disconnect(); ro.disconnect()
       container.removeEventListener('pointermove', onPointerMove)

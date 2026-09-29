@@ -5,7 +5,11 @@
 import { effect, frame, init, sampler, storage, surface, target, uniforms } from './vendor/vgpu.js'
 
 const SHAPE_MODES = { mixed: 0, squares: 1, circles: 2, triangles: 3 }
-const MAX_DPR = 2
+// Плотность холста не выше 1: поле из тусклых фигур с мягким свечением на ретине выглядит так же, а точек
+// вчетверо меньше. В полной плотности 2 фон занимал видеокарту больше чем на 80% даже на новом ноутбуке
+const MAX_DPR = 1
+// в покое поле течёт медленно, ему хватает 30 кадров в секунду; всплеск от курсора и заставка идут на полной частоте
+const IDLE_FRAME_MS = 1000 / 30
 const MAX_MASK_SIZE = 1024
 const NOISE_CELLS = 32
 const TIME_RATE = 0.1
@@ -318,6 +322,7 @@ export function createShapeWaves(root, options = {}) {
   let maskTexture
   let chargeBuffer
   let frameId = 0
+  let idleTimer = 0
   let lastFrameTime = 0
   let time = 0
   let drift = [0, 0]
@@ -605,12 +610,21 @@ export function createShapeWaves(root, options = {}) {
           root.dataset.ready = 'true'
           settings.onReady?.()
         }
-        if (animating || hovering || introPlaying) frameId = requestAnimationFrame(render)
-        else lastFrameTime = 0
+        if (hovering || introPlaying) frameId = requestAnimationFrame(render)
+        else if (animating) {
+          // В покое следующий кадр заказываем таймером, а не на каждом обновлении экрана: иначе страница
+          // просыпалась бы 60–165 раз в секунду, даже когда кадр пропускается
+          const gap = document.documentElement.classList.contains('lite') ? 1000 / 20 : IDLE_FRAME_MS
+          frameId = -1
+          idleTimer = setTimeout(() => { idleTimer = 0; frameId = requestAnimationFrame(render) }, gap - 8)
+        } else lastFrameTime = 0
       }
 
       wakeRenderer = () => {
-        if (disposed || failed || frameId) return
+        if (disposed || failed) return
+        // курсор или появление на экране будят поле сразу, не дожидаясь таймера
+        if (idleTimer) { clearTimeout(idleTimer); idleTimer = 0; frameId = 0 }
+        if (frameId) return
         frameId = requestAnimationFrame(render)
       }
 
@@ -687,11 +701,15 @@ export function createShapeWaves(root, options = {}) {
         applySettings()
       }
 
+      // слабый компьютер (common.js): свечение выключаем, это два прохода размытия и сведение каждый кадр
+      addEventListener('simple:lite', () => { settings.glow = 0; applySettings() })
+      if (document.documentElement.classList.contains('lite')) settings.glow = 0
       resizeObserver = new ResizeObserver(resize)
       resizeObserver.observe(root)
       visibilityObserver = new IntersectionObserver(
         entries => {
-          visible = entries.some(entry => entry.isIntersecting)
+          // первый экран, который лишь касается края окна, не считается видимым
+          visible = entries.some(entry => entry.isIntersecting && entry.intersectionRatio > 0)
           if (visible) wakeRenderer()
         },
         { threshold: 0 }
@@ -718,7 +736,8 @@ export function createShapeWaves(root, options = {}) {
     resizeObserver?.disconnect()
     visibilityObserver?.disconnect()
     unsubscribeGpuError?.()
-    if (frameId) cancelAnimationFrame(frameId)
+    if (frameId > 0) cancelAnimationFrame(frameId)
+    clearTimeout(idleTimer)
     maskTexture?.destroy()
     chargeBuffer?.destroy()
     gpu?.dispose()

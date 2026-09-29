@@ -85,6 +85,7 @@
     let height = 1
     let dpr = 1
     let raf = 0
+    let timer = 0
     let last = performance.now()
     let visible = true
     let alive = true
@@ -423,7 +424,7 @@
       last = now
       const view = ensureLayout()
 
-      const sweeping = s.sweep && !reducedMotion && !pointer.inside && dragging < 0
+      const sweeping = s.sweep && !reducedMotion && !pointer.inside && dragging < 0 && !document.documentElement.classList.contains('lite')
       if (sweeping) clock += dt * s.speed
       pulse += dt
       let targetX = pointer.x
@@ -533,10 +534,17 @@
         moving ||
         Math.abs(presence - (s.reveal === 'area' && active && dragging < 0 ? 1 : 0)) > 0.002 ||
         (frame.alpha > 0.01 && frame.alpha < 0.99)
-      if ((active || settling) && visible && alive) raf = requestAnimationFrame(tick)
+      if ((active || settling) && visible && alive) {
+        // Линза, которая сама ходит по буквам, движется медленно: ей хватает 30 кадров в секунду, и следующий
+        // кадр заказываем таймером. Под курсором и при перетаскивании буквы кадров полный набор.
+        // На слабом компьютере линза сама не ходит
+        if (!pointer.inside && dragging < 0) timer = setTimeout(() => { timer = 0; raf = requestAnimationFrame(tick) }, 1000 / 30 - 8)
+        else raf = requestAnimationFrame(tick)
+      }
     }
 
     const wake = () => {
+      if (timer) { clearTimeout(timer); timer = 0 }
       if (raf || !visible || !alive) return
       last = performance.now()
       raf = requestAnimationFrame(tick)
@@ -545,7 +553,8 @@
     const resize = () => {
       width = Math.max(1, container.clientWidth)
       height = Math.max(1, container.clientHeight)
-      dpr = Math.min(window.devicePixelRatio || 1, 2)
+      // крупным буквам на ретине хватает плотности 1,5, на слабом компьютере 1
+      dpr = Math.min(window.devicePixelRatio || 1, document.documentElement.classList.contains('lite') ? 1 : 1.5)
       Object.assign(bleed, { top: 0, right: 0, bottom: 0, left: 0 }, s.bleed ? s.bleed() : null)
       for (const k in bleed) bleed[k] = Math.max(0, Math.round(bleed[k]))
       ox = Math.round(bleed.left * dpr)
@@ -612,6 +621,7 @@
 
     const resizeObserver = new ResizeObserver(resize)
     resizeObserver.observe(container)
+    addEventListener('simple:lite', resize)   // слабый компьютер: холст на плотность 1
     if (s.bleed) addEventListener('resize', resize)
     const intersectionObserver = new IntersectionObserver(([entry]) => {
       visible = entry.isIntersecting
@@ -625,6 +635,7 @@
     return () => {
       alive = false
       cancelAnimationFrame(raf)
+      clearTimeout(timer)
       resizeObserver.disconnect()
       intersectionObserver.disconnect()
       removeEventListener('resize', resize)
