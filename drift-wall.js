@@ -20,6 +20,8 @@ export function createDriftWall(container, options = {}) {
   const base = { ...DEFAULTS, ...options }
   const motion = matchMedia('(prefers-reduced-motion: reduce)')
   let reduced = motion.matches
+  // спокойный режим на совсем слабом компьютере (common.js): колонки сами не плывут, стена откликается только на курсор
+  const still = () => document.documentElement.classList.contains('calm')
 
   let o = base
   let size = { w: 0, h: 0 }, planeH = 0
@@ -218,7 +220,7 @@ export function createDriftWall(container, options = {}) {
       } else {
         if (!reduced) {
           const paused = (inside && o.pauseOnHover) || hoveredCol === c
-          const target = paused ? 0 : baseVel[c]
+          const target = paused || still() ? 0 : baseVel[c]
           const ease = 1 - Math.exp(-dt / (target === 0 ? 0.16 : 0.28))
           velocities[c] += (target - velocities[c]) * ease
           off += velocities[c] * dt
@@ -240,10 +242,10 @@ export function createDriftWall(container, options = {}) {
     if (inside || focus || hoveredCol >= 0 || !tracks.length) return false
     if (reduced) return true   // без движения стене в покое кадры не нужны вовсе
     if (Math.abs(damped.x) + Math.abs(damped.y) > 0.02 || Math.abs(shift.cur) > 0.5 || shift.target) return false
-    return velocities.every((v, c) => Math.abs(v - baseVel[c]) < 0.5)
+    return velocities.every((v, c) => Math.abs(v - (still() ? 0 : baseVel[c])) < 0.5)
   }
   function drift() {
-    if (anims.length || !visible || reduced || !tracks.length) return
+    if (anims.length || !visible || reduced || still() || !tracks.length) return
     damped = { x: 0, y: 0 }; shift.cur = 0
     applyPlane()
     anims = tracks.map((t, c) => {
@@ -394,6 +396,9 @@ export function createDriftWall(container, options = {}) {
   // это вдвое утяжеляло кадры в других блоках. Возвращаются за экран до того, как стену станет видно
   const far = new IntersectionObserver(([entry]) => container.classList.toggle('is-far', !entry.isIntersecting), { rootMargin: '100% 0px' })
   far.observe(container)
+
+  // стена уже плыла, когда включился спокойный режим: колонки плавно останавливаются
+  addEventListener('simple:tier', () => { if (still()) wake() })
 
   build()
 

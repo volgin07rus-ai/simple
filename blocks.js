@@ -134,11 +134,19 @@
     fitRows.forEach(r => solve.observe(r))
   }
   /* ---------- 6. Как устроен месяц: шаги по кругу и наклон карточек за курсором ---------- */
-  // Шаги загораются сами, от прокрутки это не зависит. Наведение делает карточку текущей и ставит круг на паузу
+  // На компьютере с мышью шаги загораются по кругу сами, наведение делает карточку текущей и ставит круг на паузу.
+  // На телефоне и планшете шаги ведёт прокрутка: карточка загорается, когда до неё доходит голова провода
+  // через весь сайт (wire.js), полоска внизу карточки идёт вместе с головой. Касания ничего не запускают
+  // и не останавливают: раньше палец, случайно задевший карточку при прокрутке, то включал её, то выключал
   const howBoard = document.getElementById('how-board')
   if (howBoard) {
     const cards = [...howBoard.querySelectorAll('.how-card')]
+    const bars = cards.map(c => c.querySelector('.how-progress i'))
+    const loopNote = howBoard.querySelector('.how-loop')
     const STEP = 2600, LOOP = 1900, RESUME = 1200
+    const READ = 0.62   // без провода голова стоит на этой доле высоты экрана, как в wire.js
+    const narrow = matchMedia('(max-width: 1024px)')
+    let mode = ''       // 'timer' — по кругу, 'scroll' — за прокруткой, 'still' — без движения
     let step = -1, timer = 0, hovered = false, seen = false, visible = false
 
     function setStep(k) {
@@ -156,6 +164,7 @@
     }
     function next() {
       clearTimeout(timer)
+      if (mode !== 'timer') return
       if (hovered || !visible || document.hidden) { timer = setTimeout(next, 400); return }
       if (step >= cards.length - 1) {
         // месяц пройден: загорается петля, потом всё сначала
@@ -169,28 +178,92 @@
       timer = setTimeout(next, STEP)
     }
 
-    if (reduce) {
-      cards.forEach(c => c.classList.add('is-past'))
-    } else {
+    /* За прокруткой. Карточки в одном ряду (планшет) делят ряд между собой по порядку */
+    let ranges = [], loopTop = Infinity, headY = -Infinity, fromWire = false, cur = null
+    const docTop = el => { let y = 0; for (let e = el; e; e = e.offsetParent) y += e.offsetTop; return y }
+    function measure() {
+      const rows = []
+      cards.forEach((c, i) => {
+        const t = docTop(c), b = t + c.offsetHeight
+        const row = rows.find(r => Math.abs(r.top - t) < 4)
+        if (row) { row.items.push(i); row.bottom = Math.max(row.bottom, b) }
+        else rows.push({ top: t, bottom: b, items: [i] })
+      })
+      ranges = []
+      rows.forEach((r, n) => {
+        const end = n + 1 < rows.length ? rows[n + 1].top : r.bottom
+        const span = (end - r.top) / r.items.length
+        r.items.forEach((i, j) => { ranges[i] = [r.top + j * span, r.top + (j + 1) * span] })
+      })
+      loopTop = docTop(loopNote)
+      follow()
+    }
+    function follow() {
+      if (mode !== 'scroll' || !ranges.length) return
+      const y = headY
+      let on = ranges.findIndex(([a, b]) => y >= a && y < b)
+      if (on < 0) on = y < ranges[0][0] ? -1 : cards.length
+      if (on !== cur) {
+        // шаг сменился: у новой карточки проигрывается сцена, прошлые остаются в итоговом виде
+        cur = on
+        cards.forEach((c, i) => {
+          c.classList.toggle('is-past', i < on)
+          c.classList.toggle('is-on', i === on)
+          if (i !== on) bars[i].style.transform = ''
+        })
+      }
+      if (on >= 0 && on < cards.length) {
+        const [a, b] = ranges[on]
+        bars[on].style.transform = `scaleX(${Math.min(1, (y - a) / (b - a)).toFixed(3)})`
+      }
+      howBoard.classList.toggle('is-loop', y >= loopTop)
+    }
+    const readLine = () => scrollY + innerHeight * READ
+    document.addEventListener('wirehead', e => { fromWire = true; headY = e.detail; follow() })
+    addEventListener('scroll', () => { if (!fromWire && mode === 'scroll') { headY = readLine(); follow() } }, { passive: true })
+
+    function setMode() {
+      const m = reduce ? 'still' : narrow.matches || !document.body.classList.contains('hoverable') ? 'scroll' : 'timer'
+      if (m === mode) return
+      mode = m
+      clearTimeout(timer)
+      step = -1; cur = null; hovered = false
+      cards.forEach((c, i) => { c.classList.remove('is-on', 'is-past'); bars[i].style.transform = '' })
+      howBoard.classList.remove('is-loop')
+      howBoard.classList.toggle('is-scroll', m === 'scroll')
+      if (m === 'still') cards.forEach(c => c.classList.add('is-past'))
+      else if (m === 'scroll') { if (!fromWire) headY = readLine(); measure() }
+      else if (visible) { seen = true; timer = setTimeout(next, 500) }
+      else seen = false
+    }
+
+    if (!reduce) {
       new IntersectionObserver(([e]) => {
         visible = e.isIntersecting
-        if (visible && !seen) { seen = true; timer = setTimeout(next, 500) }
+        if (visible && !seen && mode === 'timer') { seen = true; timer = setTimeout(next, 500) }
       }, { threshold: 0.3 }).observe(howBoard)
+      // карточки сдвигаются и когда меняется что-то выше (раскрытый пункт услуг): следим за высотой всей страницы
+      new ResizeObserver(() => { if (mode === 'scroll') measure() }).observe(document.getElementById('main') || howBoard)
+      document.fonts?.ready.then(() => { if (mode === 'scroll') measure() })
+      narrow.addEventListener('change', setMode)
 
-      // Наведение (или касание) делает карточку текущей
+      // Наведение мышью делает карточку текущей. Касания не считаются: на телефоне шаги ведёт прокрутка
       cards.forEach((card, k) => {
-        card.addEventListener('pointerenter', () => {
+        card.addEventListener('pointerenter', e => {
+          if (mode !== 'timer' || e.pointerType === 'touch') return
           hovered = true
           clearTimeout(timer)
           if (step !== k) setStep(k)
         })
-        card.addEventListener('pointerleave', () => {
+        card.addEventListener('pointerleave', e => {
+          if (mode !== 'timer' || e.pointerType === 'touch') return
           hovered = false
           clearTimeout(timer)
           timer = setTimeout(next, RESUME)
         })
       })
     }
+    setMode()
 
     cards.forEach(card => glassTilt(card, card.querySelector('.glass')))
   }

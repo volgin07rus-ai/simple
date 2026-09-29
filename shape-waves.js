@@ -324,6 +324,7 @@ export function createShapeWaves(root, options = {}) {
   let frameId = 0
   let idleTimer = 0
   let lastFrameTime = 0
+  let drawnAt = -1e9
   let time = 0
   let drift = [0, 0]
   let dpr = 1
@@ -561,6 +562,16 @@ export function createShapeWaves(root, options = {}) {
       const render = now => {
         frameId = 0
         if (disposed || failed) return
+        // Всплеск под курсором рисуем не чаще 60 кадров в секунду: волна и так считается 60 раз в секунду,
+        // а на экранах 120–165 Гц лишние кадры выходили такими же, только видеокарта рисовала поле заново.
+        // Поле — самое тяжёлое для видеокарты на странице. На слабом компьютере (класс lite) всплеску хватает 30 кадров
+        const hotGap = document.documentElement.classList.contains('lite') ? 1000 / 30 : 1000 / 60
+        if (chargesActive && introProgress >= INTRO_END && now - drawnAt < hotGap - 2) {
+          frameId = -1
+          idleTimer = setTimeout(() => { idleTimer = 0; frameId = requestAnimationFrame(render) }, Math.max(0, drawnAt + hotGap - 4 - performance.now()))
+          return
+        }
+        drawnAt = now
         const deltaSeconds = lastFrameTime ? Math.min(0.1, (now - lastFrameTime) / 1000) : 0
         lastFrameTime = now
         const animating = isAnimating()
@@ -704,6 +715,12 @@ export function createShapeWaves(root, options = {}) {
       // слабый компьютер (common.js): свечение выключаем, это два прохода размытия и сведение каждый кадр
       addEventListener('simple:lite', () => { settings.glow = 0; applySettings() })
       if (document.documentElement.classList.contains('lite')) settings.glow = 0
+      // Спокойный режим на совсем слабом компьютере: поле стоит неподвижным узором и не вспыхивает под курсором.
+      // Под нагрузкой на видеокарту всплески поля давали почти все рывки первого экрана, без них кадры ровные
+      const calm = () => document.documentElement.classList.contains('calm')
+      const settle = () => { settings.paused = true; settings.interactive = false; wakeRenderer() }
+      addEventListener('simple:tier', () => { if (calm() && !settings.paused) settle() })
+      if (calm()) { settings.paused = true; settings.interactive = false }
       resizeObserver = new ResizeObserver(resize)
       resizeObserver.observe(root)
       visibilityObserver = new IntersectionObserver(

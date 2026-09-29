@@ -182,6 +182,7 @@ void main(){
     const offset = Math.random() * 100
     let raf = 0, timer = 0, visible = false, lastMove = 0, loadStart = 0, drawnAt = -1e9
     const lite = () => document.documentElement.classList.contains('lite')
+    const calm = () => document.documentElement.classList.contains('calm')
 
     function resize() {
       // символы крупные и светятся: плотности полтора хватает, а точек втрое меньше, чем на ретине в полную силу
@@ -243,6 +244,8 @@ void main(){
       // Следующий такой кадр заказываем таймером: страница не просыпается на каждом обновлении экрана
       const loading = now - loadStart < 2100
       const idle = !loading && (touch || now - lastMove > 1500)
+      // спокойный режим на совсем слабом компьютере (common.js): без движения мыши символы стоят и кадров нет
+      if (idle && calm()) return
       const gap = idle ? (lite() ? 1000 / 20 : 1000 / 30) : 1000 / 60
       if (now - drawnAt >= gap * 0.7) { drawnAt = now; draw(now) }
       if (idle) timer = setTimeout(() => { timer = 0; raf = requestAnimationFrame(tick) }, gap - 8)

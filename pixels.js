@@ -13,6 +13,7 @@
   if (!hosts.length || !window.WebGL2RenderingContext) return
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches
   const lite = () => document.documentElement.classList.contains('lite')
+  const calm = () => document.documentElement.classList.contains('calm')
   const SHAPES = { square: 0, circle: 1, triangle: 2, diamond: 3 }
   const MAX_CLICKS = 10, MAX_TRAIL = 16
   const TRAIL_LIFE = 1.4     // сколько секунд горит след курсора
@@ -321,6 +322,8 @@ void main(){
       // браузер без сборки в фоне: ждём сборку сейчас, в свободное время, а не в момент появления пятна
       warm() { if (!parallel) prepare() },
       get dead() { return dead },
+      // спокойный режим: холст убираем и отдаём его память видеокарте
+      drop() { if (dead) return; dead = true; gl.getExtension('WEBGL_lose_context')?.loseContext(); canvas.remove() },
       // пока шейдеры собираются, заглядываем каждый кадр; потом кадры нужны, только пока горит след или волна
       hot: now => !ready || now < hotUntil || dirty,
       // след курсора в координатах холста: от левого нижнего угла, в пикселях устройства
@@ -380,6 +383,7 @@ void main(){
   const live = []
   const mountHost = host => {
     if ('pxInst' in host) return host.pxInst
+    if (calm()) return null   // спокойный режим на слабом компьютере (common.js): фона из пикселей нет
     const inst = mount(host)
     host.pxInst = inst
     if (inst) live.push(inst)
@@ -425,8 +429,9 @@ void main(){
     if (!raf) raf = requestAnimationFrame(loop)
   }
   document.addEventListener('visibilitychange', kick)
-  // слабый компьютер (common.js): холсты переходят на плотность 1
-  addEventListener('simple:lite', () => live.forEach(l => l.resize()))
+  // слабый компьютер (common.js): холсты переходят на плотность 1, а в спокойном режиме убираются совсем
+  addEventListener('simple:lite', () => live.forEach(l => l.dead || l.resize()))
+  addEventListener('simple:tier', () => { if (calm()) live.forEach(l => l.drop()) })
 
   // Курсор и клики слушаем на всём окне: пятна лежат под содержимым, до них самих события не доходят
   const pick = (e, fn) => {

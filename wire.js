@@ -45,6 +45,13 @@
     const channel = right - left > 48 ? (left + right) / 2 : gutter
     const h = box(hub), p = box(printer)
     const fitTop = box(q('#fit')).t, worksTop = box(q('#works')).t
+    // К кассе провод подходит слева и заходит в порт на её боку. На телефоне касса стоит почти вплотную
+    // к коридору, поворот к порту прятался за её корпусом, и видимая линия обрывалась выше порта.
+    // Если места на поворот нет, провод спускается прямо в порт, а порт встаёт точно под провод
+    const side = p.l - gutter >= R + 12
+    // сдвиг порта считаем по точному положению кассы: сумма округлённых offsetLeft расходится с ним на полпикселя
+    const exact = printer.getBoundingClientRect().left - main.getBoundingClientRect().left
+    printer.style.setProperty('--port-x', side ? '' : `${(Math.round(gutter) - exact - 1).toFixed(2)}px`)
     const raw = [
       [h.cx, h.b],              // из-под карточки Simple
       [h.cx, fitTop],           // по границам блоков провод переходит в другой коридор
@@ -52,7 +59,7 @@
       [channel, worksTop],
       [gutter, worksTop],
       [gutter, p.cy],
-      [p.l + 40, p.cy]          // конец прячется за кассой
+      ...(side ? [[p.l + 40, p.cy]] : [])   // конец прячется за кассой
     ].map(([x, y]) => [Math.round(x), Math.round(y)])
     // повторы и точки на одной прямой убираем, иначе скругление не построить
     const P = [raw[0]]
@@ -66,7 +73,7 @@
     return P
   }
 
-  let K = [], L = [], total = 0, shown = 0, target = 0, raf = 0, top = 0
+  let K = [], L = [], total = 0, shown = 0, target = 0, raf = 0, top = 0, sent = -1
   let pulseAt = -1, delivered = false
 
   function build() {
@@ -123,6 +130,7 @@
 
     top = main.getBoundingClientRect().top + scrollY
     shown = Math.min(shown, total)
+    sent = -1
     if (reduce) { shown = target = total; paint(); return }
     target = lengthAt(scrollY + innerHeight * READ - top)
     if (!raf) raf = requestAnimationFrame(frame)
@@ -159,10 +167,15 @@
     }
     const live = shown > 1 && shown < total - 1
     head.classList.toggle('is-on', live)
-    if (live) {
+    if (shown !== sent) {
+      sent = shown
       const pt = pointAt(shown)
-      head.setAttribute('cx', pt.x)
-      head.setAttribute('cy', pt.y)
+      if (live) {
+        head.setAttribute('cx', pt.x)
+        head.setAttribute('cy', pt.y)
+      }
+      // где сейчас голова провода на странице: по ней на телефоне загораются шаги «Что происходит после подключения»
+      document.dispatchEvent(new CustomEvent('wirehead', { detail: top + pt.y }))
     }
     hub.classList.toggle('is-wired', shown > 1)
     const arrived = shown >= total - 1
@@ -200,9 +213,10 @@
       target = lengthAt(scrollY + innerHeight * READ - top)
       if (!raf) raf = requestAnimationFrame(frame)
     }, { passive: true })
-    // импульс запускаем, только когда голова провода на экране
+    // импульс запускаем, только когда голова провода на экране. На слабом компьютере (класс lite) импульса нет:
+    // пока он бежит, страница перерисовывается каждый кадр
     setInterval(() => {
-      if (document.hidden || shown < 120 || shown >= total - 1) return
+      if (document.hidden || shown < 120 || shown >= total - 1 || document.documentElement.classList.contains('lite')) return
       const y = pointAt(shown).y + top - scrollY
       if (y < 0 || y > innerHeight) return
       pulseAt = performance.now()

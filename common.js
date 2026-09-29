@@ -45,45 +45,132 @@
   addEventListener('scroll', onScroll, { passive: true })
   onScroll()
 
-  /* ---------- Слабый компьютер: облегчённый режим ---------- */
-  // Первые три секунды после загрузки и первые три секунды прокрутки меряем, как часто браузер успевает
-  // рисовать кадры. Если обычный кадр дольше 24 мс (меньше 40 кадров в секунду), включаем облегчённый режим:
-  // класс lite на html и событие simple:lite. Фоны на холстах переходят на плотность 1 и 20 кадров в секунду,
-  // у поля фигур гаснет свечение, линза надписи и пятна света стоят, шапка и появления блоков без размытия.
-  // Так же, если браузер сам просит экономить трафик или сам снизил частоту кадров, как Safari в режиме энергосбережения
+  /* ---------- Слабое железо: облегчённый и спокойный режимы ---------- */
+  // Три уровня, содержимое на всех одно и то же: схемы, сцены, чек, шаги.
+  // Полный: всё как задумано.
+  // Облегчённый (класс lite на html, событие simple:lite): фоны на холстах в плотности 1 и 20 кадров в секунду,
+  // у поля фигур нет свечения, линза надписи стоит, шапка и появления блоков без размытия, по проводу не бегает импульс.
+  // Спокойный (вдобавок класс calm, событие simple:tier): фона из пикселей нет вовсе, поле фигур на первом экране,
+  // стена работ и символы в брифе стоят, пока их не трогают курсором, огоньки по линиям второго блока не бегают.
+  //
+  // Уровень выбирается сам. Сразу при загрузке: по видеокарте, если браузер её называет (встроенная Intel
+  // старых поколений на экране с большой плотностью — облегчённый, рисование без видеокарты — спокойный),
+  // по просьбе браузера экономить трафик и по уровню, уже выбранному на этом компьютере за последние три дня.
+  // Потом по замерам: после загрузки, при первой прокрутке и при появлении блоков по 2,5–3 секунды считаем кадры.
+  // Опоздало больше 6% кадров (дольше 25 мс, или в полтора раза дольше обычного на экранах, где кадр и так длинный):
+  // на экране 60 Гц это уже заметные рывки. Уровень поднимается на ступень, через полторы секунды замер повторяется.
+  // На быстром компьютере опаздывает не больше 2% кадров, и то во время загрузки
+  // Обычный кадр дольше 24 мс (меньше 40 кадров в секунду) — облегчённый. Вниз уровень сам не возвращается.
+  // Посмотреть режим вручную: адрес с ?quality=full, ?quality=lite или ?quality=calm (держится до конца визита),
+  // ?quality=auto снова включает автоматический выбор
   const root = document.documentElement
-  function goLite() {
-    if (root.classList.contains('lite')) return
-    root.classList.add('lite')
-    dispatchEvent(new Event('simple:lite'))
+  const KEY = 'simple-quality', LEVELS = { full: 0, lite: 1, calm: 2 }
+  // хранилища браузера могут быть недоступны (приватный режим, запрет сайта): тогда просто не запоминаем
+  const store = (s, k, v) => { try { v === undefined ? window[s].removeItem(k) : window[s].setItem(k, v) } catch {} }
+  const read = (s, k) => { try { return window[s].getItem(k) } catch { return null } }
+  let tier = 0, pinned = false
+
+  function apply(t) {
+    const was = tier
+    tier = t
+    root.classList.toggle('lite', tier >= 1)
+    root.classList.toggle('calm', tier >= 2)
+    if (was < 1 && tier >= 1) dispatchEvent(new Event('simple:lite'))
+    dispatchEvent(new CustomEvent('simple:tier', { detail: tier }))
   }
-  if (navigator.connection && navigator.connection.saveData) goLite()
-  function probe(ms) {
-    if (root.classList.contains('lite') || document.hidden) return
+  // уровень по замеру: запоминаем на визит и на три дня для этого компьютера
+  function raise(t) {
+    t = Math.min(2, t)
+    if (pinned || t <= tier) return false
+    apply(t)
+    store('sessionStorage', KEY, String(tier))
+    store('localStorage', KEY, JSON.stringify({ tier, at: Date.now() }))
+    return true
+  }
+
+  // Видеокарта по имени. Safari имя не называет, там решают замеры
+  function gpuHint() {
+    try {
+      const canvas = document.createElement('canvas')
+      if (canvas.getContext('webgl', { failIfMajorPerformanceCaveat: true })) {
+        const gl = canvas.getContext('webgl')
+        let name = gl.getParameter(gl.RENDERER) || ''
+        if (/^(WebKit WebGL|Mozilla)$/i.test(name)) {
+          const ext = gl.getExtension('WEBGL_debug_renderer_info')
+          if (ext) name = gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) || name
+        }
+        gl.getExtension('WEBGL_lose_context')?.loseContext()
+        const pixels = innerWidth * innerHeight * devicePixelRatio ** 2
+        // встроенная Intel до Iris Xe (HD, UHD, Iris Plus и Pro, как в MacBook 2015–2020), слабые мобильные и старые AMD
+        const weak = /Intel.*(HD Graphics|UHD Graphics|Iris(\((TM|R)\))? (Plus|Pro|Graphics \d))|Mali-(T\d+|G[1-5]\d)\b|Adreno\D*[1-5]\d\d\b|PowerVR|Radeon R[2-7]\b/i.test(name)
+        return weak && pixels > 2.2e6 ? 1 : 0
+      }
+      // WebGL есть, но только без видеокарты, программно: такой компьютер не потянет даже облегчённый режим
+      const soft = canvas.getContext('webgl')
+      soft?.getExtension('WEBGL_lose_context')?.loseContext()
+      return soft ? 2 : 0
+    } catch { return 0 }
+  }
+
+  const asked = new URLSearchParams(location.search).get('quality')
+  if (asked === 'auto') { store('sessionStorage', KEY + '-pin'); store('sessionStorage', KEY); store('localStorage', KEY) }
+  else if (asked in LEVELS) store('sessionStorage', KEY + '-pin', String(LEVELS[asked]))
+  const pin = read('sessionStorage', KEY + '-pin')
+  if (pin !== null) { pinned = true; if (+pin) apply(+pin) }
+  else {
+    let start = +read('sessionStorage', KEY) || 0
+    try {
+      const saved = JSON.parse(read('localStorage', KEY) || 'null')
+      if (saved && Date.now() - saved.at < 3 * 864e5) start = Math.max(start, saved.tier)
+    } catch {}
+    if (navigator.connection && navigator.connection.saveData) start = Math.max(start, 1)
+    if (start < 2) start = Math.max(start, gpuHint())
+    if (start) apply(Math.min(2, start))
+  }
+
+  let sampling = false, lastSample = -1e9, samples = 0
+  function sample(ms = 2500, again = false) {
+    if (pinned || tier >= 2 || sampling || document.hidden || samples >= 12) return
+    if (!again && performance.now() - lastSample < 4000) return
+    sampling = true
     const gaps = []
-    let prev = 0, t0 = 0
+    let prev = 0, t0 = 0, hidden = false
     const step = now => {
-      if (document.hidden) return
+      if (document.hidden) hidden = true
       if (prev) gaps.push(now - prev)
       prev = now
       t0 ||= now
-      if (now - t0 < ms) { requestAnimationFrame(step); return }
+      if (!hidden && now - t0 < ms) { requestAnimationFrame(step); return }
+      sampling = false
+      lastSample = performance.now()
+      samples++
+      if (hidden || gaps.length < 20) return
       gaps.sort((a, b) => a - b)
-      if (gaps.length > 20 && gaps[gaps.length >> 1] > 24) goLite()
+      const base = gaps[Math.floor(gaps.length * 0.1)], median = gaps[gaps.length >> 1]
+      const late = gaps.filter(g => g > Math.max(25, base * 1.5)).length / gaps.length
+      dispatchEvent(new CustomEvent('simple:frames', { detail: { late, median, base, n: gaps.length } }))   // для проверок
+      const raised = late > 0.06 ? raise(tier + 1) : median > 24 && tier < 1 ? raise(1) : false
+      // после перехода меряем ещё раз: вдруг и этого мало
+      if (raised && tier < 2) setTimeout(() => sample(2500, true), 1500)
     }
     requestAnimationFrame(step)
   }
-  addEventListener('load', () => setTimeout(() => probe(3000), 1200))
+  addEventListener('load', () => setTimeout(() => sample(3000), 1200))
   addEventListener('scroll', function first() {
     removeEventListener('scroll', first)
-    setTimeout(() => probe(3000), 200)
+    setTimeout(() => sample(3000), 200)
   }, { passive: true })
 
   /* ---------- Анимации по кругу за пределами экрана стоят ---------- */
   // Мигающие точки, огоньки по линиям схем, «печатает…» в чате: браузер крутит такие анимации всё время,
   // даже когда блок далеко за экраном, а огоньки по линиям ещё и пересчитывает основным потоком каждый кадр.
-  // Блок ушёл с экрана, и его анимации замирают; вернулся, и они идут дальше с того же места
-  const sleeper = new IntersectionObserver(entries => entries.forEach(e => e.target.classList.toggle('is-offscreen', !e.isIntersecting)), { rootMargin: '150px 0px' })
+  // Блок ушёл с экрана, и его анимации замирают; вернулся, и они идут дальше с того же места.
+  // Когда блок показывается впервые, заодно меряем кадры: у каждого блока своя нагрузка
+  const met = new WeakSet()
+  const sleeper = new IntersectionObserver(entries => entries.forEach(e => {
+    e.target.classList.toggle('is-offscreen', !e.isIntersecting)
+    if (e.isIntersecting && !met.has(e.target)) { met.add(e.target); setTimeout(() => sample(), 600) }
+  }), { rootMargin: '150px 0px' })
   document.querySelectorAll('main > section').forEach(s => sleeper.observe(s))
 
   /* ---------- Плавный переезд к блоку по ссылкам меню и якорям ---------- */

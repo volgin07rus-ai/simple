@@ -26,11 +26,14 @@
 
 /* блок за пределами экрана: его анимации по кругу стоят (common.js) */
 .is-offscreen,.is-offscreen *{ animation-play-state:paused !important }
-/* Облегчённый режим для слабых компьютеров (common.js включает его, если кадры стабильно не успевают).
-   Фоны на холстах сами переходят на плотность 1 и 20 кадров в секунду; здесь стоят пятна света,
-   шапка без размытия под собой, а появления блоков без размытия: только прозрачность и сдвиг */
+/* Облегчённый режим для слабых компьютеров (common.js включает его, если кадры не успевают).
+   Фоны на холстах сами переходят на плотность 1 и 20 кадров в секунду; здесь шапка без размытия под собой,
+   а появления блоков без размытия: только прозрачность и сдвиг */
 .lite .hdr.is-scrolled{ -webkit-backdrop-filter:none; backdrop-filter:none; background:rgba(7,8,7,.95) }
 .lite *:not(.drift-wall__tile img){ filter:none !important }
+/* Спокойный режим для совсем слабых компьютеров (класс calm вдобавок к lite): фона из пикселей нет, поле фигур
+   и стена работ стоят, пока их не трогают. Здесь: огоньки по линиям второго блока не бегают, линии остаются */
+.calm .merge.is-flowing .comet{ animation:none; opacity:0 }
 
 /* ============ rem-сетка ============ */
 html{ font-size:clamp(12px,1.1111vw,19px) }
@@ -639,6 +642,8 @@ html::-webkit-scrollbar{ display:none }
 .how-card.is-on .how-progress i{ animation:how-fill var(--dur,2600ms) linear forwards }
 .how-card.is-past .how-progress i{ transform:scaleX(1); opacity:.35 }
 @keyframes how-fill{ to{ transform:scaleX(1) } }
+/* на телефоне и планшете полоску ведёт прокрутка (blocks.js), а не время */
+.how-board.is-scroll .how-card.is-on .how-progress i{ animation:none }
 
 /* пройденный шаг и текущий */
 .how-card.is-past .how-no,.how-card.is-on .how-no{ color:var(--lime) }
@@ -1366,7 +1371,8 @@ main{ position:relative }
   transition:background .5s var(--ease-quart), border-color .5s var(--ease-quart);
 }
 .hub::after{ left:50%; bottom:-.25rem; margin-left:-.25rem }
-.receipt-printer::before{ left:-.25rem; top:50%; margin-top:-.25rem }
+/* на телефоне провод спускается в порт сверху, и wire.js ставит порт точно под него (--port-x) */
+.receipt-printer::before{ left:calc(var(--port-x, 0px) - .25rem); top:50%; margin-top:-.25rem }
 .hub.is-wired::after,.receipt-printer.is-wired::before{ background:var(--lime); border-color:var(--lime) }
 
 /* ============ Надпись Simple в конце страницы (TechText) ============ */

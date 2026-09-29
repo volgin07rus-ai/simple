@@ -357,21 +357,64 @@
     play(keys[i])
   }
 
+  // На телефоне пункт раскрывается под кнопкой: описание, под ним окно со сценой. Камера плавно съезжает ровно
+  // настолько, чтобы открытый пункт целиком встал на экран; если он выше экрана, кнопка встаёт под шапку.
+  // Открытый пункт выше при этом схлопывается, но кнопка не прыгает: её путь по экрану плавный от места нажатия
+  const hdr = document.getElementById('hdr')
+  const inOut = t => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2)
+  let glide = 0
+  const stopGlide = () => { cancelAnimationFrame(glide); glide = 0 }
+  addEventListener('touchstart', stopGlide, { passive: true })
+  addEventListener('wheel', stopGlide, { passive: true })
+
+  function openOnPhone(i) {
+    const it = items[i], btn = it.querySelector('.svc-btn')
+    const prev = current >= 0 ? items[current] : null
+    const before = btn.getBoundingClientRect().top
+    // открытый пункт выше схлопнется целиком: кнопка поднимется на высоту его описания
+    let fold = 0
+    if (prev && items.indexOf(prev) < i) {
+      const d = prev.querySelector('.svc-desc')
+      fold = d.getBoundingClientRect().height + parseFloat(getComputedStyle(d).marginBottom)
+    }
+    show(i)
+    if (!reduce) screen.animate([
+      { opacity: 0, transform: 'translateY(-.75rem) scale(.985)' },
+      { opacity: 1, transform: 'none' }
+    ], { duration: 650, easing: 'cubic-bezier(.25,1,.5,1)' })
+
+    // Где окажутся кнопка и низ пункта, когда описания доедут (.svc-desc: высота за .6 с, отступ снизу 1.4rem).
+    // Без анимаций описания уже на месте
+    const desc = it.querySelector('.svc-desc')
+    const grow = reduce ? 0 : desc.firstElementChild.scrollHeight + parseFloat(getComputedStyle(document.documentElement).fontSize) * 1.4
+    if (reduce) fold = 0
+    const finalTop = btn.getBoundingClientRect().top + scrollY - fold
+    const height = it.offsetHeight + grow
+    const viewTop = hdr.offsetHeight + 12, viewBottom = innerHeight - 16
+    let to = height <= viewBottom - viewTop ? Math.min(Math.max(before, viewTop), viewBottom - height) : viewTop
+    const maxScroll = document.documentElement.scrollHeight - fold + grow - innerHeight
+    to = Math.min(finalTop, Math.max(to, finalTop - maxScroll))
+
+    stopGlide()
+    if (reduce) { scrollBy({ top: btn.getBoundingClientRect().top - to, behavior: 'instant' }); return }
+    const dur = Math.min(900, 500 + Math.abs(to - before) * 0.6), hold = Math.max(dur, 700), t0 = performance.now()
+    const step = now => {
+      const t = Math.min(1, (now - t0) / dur)
+      const want = before + (to - before) * inOut(t)
+      const shift = btn.getBoundingClientRect().top - want
+      if (Math.abs(shift) > 0.5) scrollBy({ top: shift, behavior: 'instant' })
+      // камера встала, но описание выше ещё может доезжать: кнопку держим, пока всё не успокоится
+      glide = now - t0 < hold ? requestAnimationFrame(step) : 0
+    }
+    step(t0)
+  }
+
   items.forEach((it, i) => {
     const btn = it.querySelector('.svc-btn')
     btn.addEventListener('click', () => {
       touched = true
       if (!narrow.matches || i === current) { show(i); return }
-      // На телефоне открытый пункт выше схлопывается: держим нажатую кнопку на месте, пока он закрывается
-      const before = btn.getBoundingClientRect().top
-      show(i)
-      const until = performance.now() + 700
-      const hold = () => {
-        const shift = btn.getBoundingClientRect().top - before
-        if (Math.abs(shift) > 0.5) scrollBy({ top: shift, behavior: 'instant' })
-        if (performance.now() < until) requestAnimationFrame(hold)
-      }
-      hold()
+      openOnPhone(i)
     })
   })
   // Фокус с клавиатуры внутри списка останавливает автоматическую смену пунктов

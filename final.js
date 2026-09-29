@@ -18,6 +18,7 @@
   const PAUSE = 400
   const UNTANGLE = 2600  // распрямление
   let W = 0, H = 0
+  path.setAttribute('pathLength', 1)
   let p = reduce ? 1 : 0          // 0 росчерк, 1 прямая
   let shown = reduce ? 1 : 0      // какая доля росчерка уже прорисована
   let done = reduce
@@ -47,11 +48,11 @@
       d += (i ? 'L' : 'M') + x.toFixed(1) + ' ' + y.toFixed(1)
     }
     path.setAttribute('d', d)
-    // пока росчерк прорисовывается, он открывается штрихом от начала линии
+    // пока росчерк прорисовывается, он открывается штрихом от начала линии. Длина линии задана как 1 (pathLength),
+    // поэтому браузеру не нужно каждый кадр заново мерить линию из сотен точек
     if (shown < 1) {
-      const len = path.getTotalLength()
-      path.style.strokeDasharray = `${len} ${len}`
-      path.style.strokeDashoffset = len * (1 - shown)
+      path.style.strokeDasharray = '1 1'
+      path.style.strokeDashoffset = 1 - shown
     } else path.style.strokeDasharray = 'none'
     // распрямлённая часть лаймовая, петли серые
     stops[1].setAttribute('offset', Math.max(0, Math.min(1, front)))
