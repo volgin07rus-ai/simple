@@ -155,29 +155,40 @@
     if (!scene.width || scene.top + scene.height * 0.5 > innerHeight) { show(); return }
 
     // Путь от центра панели до гнезда в шапке в координатах самой панели: наклон на них не влияет
+    const head = ico.parentElement
     const w = ico.offsetWidth
-    const dx = panel.offsetWidth / 2 - (ico.offsetLeft + w / 2)
-    const dy = panel.offsetHeight * 0.46 - (ico.offsetTop + w / 2)
+    const dx = panel.offsetWidth / 2 - (head.offsetLeft + ico.offsetLeft + w / 2)
+    const dy = panel.offsetHeight * 0.46 - (head.offsetTop + ico.offsetTop + w / 2)
     const z = panel.offsetWidth * 0.09   // логотип парит над панелью, пока крупный
-    const big = `translate3d(${dx}px, ${dy}px, ${z}px) scale(4)`
 
-    const pop = ico.animate([
-      { transform: `translate3d(${dx}px, ${dy}px, ${z}px) scale(3.5)`, opacity: 0, filter: 'blur(8px)' },
+    // Крупный логотип — отдельная копия значка в полный размер. Раньше растягивали сам значок в 4 раза,
+    // и браузер растягивал уже нарисованную маленькую картинку: крупный логотип выходил мыльным.
+    // Копия нарисована сразу крупной, поэтому чёткая; она уменьшается и садится ровно в гнездо,
+    // там её сменяет сам значок, а копия убирается
+    const K = 4
+    const fly = ico.cloneNode(true)
+    fly.removeAttribute('id')
+    fly.className = 'p-ico-fly'
+    fly.style.cssText = `left:${ico.offsetLeft + w / 2 - w * K / 2}px; top:${ico.offsetTop + w / 2 - w * K / 2}px; width:${w * K}px; height:${w * K}px`
+    head.append(fly)
+    let landed = false
+    const finish = () => { if (landed) return; landed = true; show(); fly.remove() }
+    const big = `translate3d(${dx}px, ${dy}px, ${z}px) scale(1)`
+
+    const pop = fly.animate([
+      { transform: `translate3d(${dx}px, ${dy}px, ${z}px) scale(${3.5 / K})`, opacity: 0, filter: 'blur(8px)' },
       { transform: big, opacity: 1, filter: 'blur(0px)' }
     ], { duration: 900, delay: 450, easing: 'cubic-bezier(.25,1,.5,1)', fill: 'both' })
 
     pop.finished.then(() => {
-      const land = ico.animate([
+      const land = fly.animate([
         { transform: big, opacity: 1 },
-        { transform: 'translate3d(0, 0, 0) scale(1)', opacity: 1 }
+        { transform: `translate3d(0, 0, 0) scale(${1 / K})`, opacity: 1 }
       ], { duration: 1200, delay: 300, easing: 'cubic-bezier(.65,0,.35,1)', fill: 'forwards' })
       return land.finished
-    }).then(() => {
-      show()
-      ico.getAnimations().forEach(an => an.cancel())
-    }).catch(show)
+    }).then(finish, finish)
 
-    setTimeout(show, 4500)   // страховка
+    setTimeout(finish, 4500)   // страховка
   }
 
   /* ---------- Живая схема: импульс бежит по веткам ---------- */
