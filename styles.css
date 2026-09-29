@@ -29,7 +29,6 @@
 /* Облегчённый режим для слабых компьютеров (common.js включает его, если кадры стабильно не успевают).
    Фоны на холстах сами переходят на плотность 1 и 20 кадров в секунду; здесь стоят пятна света,
    шапка без размытия под собой, а появления блоков без размытия: только прозрачность и сдвиг */
-.lite .aurora{ animation:none }
 .lite .hdr.is-scrolled{ -webkit-backdrop-filter:none; backdrop-filter:none; background:rgba(7,8,7,.95) }
 .lite *:not(.drift-wall__tile img){ filter:none !important }
 
@@ -248,27 +247,9 @@ html::-webkit-scrollbar{ display:none }
 /* ============ Первый экран ============ */
 .hero{ position:relative; min-height:100dvh; display:flex; align-items:center; overflow:hidden; isolation:isolate; -webkit-tap-highlight-color:transparent }
 .hero-bg{ position:absolute; inset:0; z-index:-1; pointer-events:none }
-.grid{
-  position:absolute; inset:0;
-  background-image:radial-gradient(rgba(255,255,255,.13) 1px, transparent 1.2px);
-  background-size:1.75rem 1.75rem;
-  -webkit-mask-image:radial-gradient(ellipse 75% 70% at 50% 45%, #000 20%, transparent 80%);
-          mask-image:radial-gradient(ellipse 75% 70% at 50% 45%, #000 20%, transparent 80%);
-  opacity:.6;
-}
-/* Мягкие пятна света. Раньше их размывал filter:blur(5rem), и видеокарта пересчитывала размытие каждый кадр
-   движения: на ретине со встроенной графикой это одна из самых дорогих вещей на странице. Теперь мягкость
-   даёт сам градиент с плавным спадом, а пятно на треть больше, как было с размытием */
-.aurora{ position:absolute; border-radius:50%; opacity:.55; will-change:transform }
-.a1{ width:60rem; height:42rem; right:-15rem; top:-12rem;
-  background:radial-gradient(closest-side, rgba(196,236,26,.4), rgba(196,236,26,.26) 30%, rgba(196,236,26,.1) 62%, rgba(196,236,26,0));
-  animation:drift1 22s ease-in-out infinite alternate }
-.a2{ width:46rem; height:32rem; right:8rem; bottom:-15rem;
-  background:radial-gradient(closest-side, rgba(64,190,210,.25), rgba(64,190,210,.16) 30%, rgba(64,190,210,.06) 62%, rgba(64,190,210,0));
-  animation:drift2 26s ease-in-out infinite alternate }
-@keyframes drift1{ to{ transform:translate(-6rem,4rem) scale(1.1) } }
-@keyframes drift2{ to{ transform:translate(5rem,-3rem) scale(.92) } }
-/* Поле фигур на WebGPU (ShapeWaves). Пока не готово, виден запасной фон с точками */
+/* Поле фигур на WebGPU (ShapeWaves). Пока оно загружается, первый экран просто тёмный, поле потом плавно
+   проявляется. Старый запасной фон (сетка точек и светящиеся пятна) убран: при загрузке он мелькал.
+   В браузере без WebGPU первый экран так и остаётся тёмным */
 .waves{ position:absolute; inset:0 }
 .shape-waves{ overflow:hidden; pointer-events:none; isolation:isolate }
 .shape-waves__canvas{
@@ -276,13 +257,6 @@ html::-webkit-scrollbar{ display:none }
   opacity:0; transition:opacity .6s cubic-bezier(.22,1,.36,1); pointer-events:none;
 }
 .shape-waves[data-ready='true'] .shape-waves__canvas{ opacity:1 }
-.grid,.aurora,.spot{ transition:opacity .8s var(--ease-quart) }
-.hero.has-waves .grid,.hero.has-waves .aurora,.hero.has-waves .spot{ opacity:0 }
-
-.spot{
-  position:absolute; inset:0;
-  background:radial-gradient(22rem circle at var(--mx,70%) var(--my,40%), rgba(216,255,50,.07), transparent 70%);
-}
 
 .hero-inner{
   width:100%; max-width:90rem; margin:0 auto;
@@ -455,7 +429,7 @@ html::-webkit-scrollbar{ display:none }
 
 @media (prefers-reduced-motion:reduce){
   .rv,.ln > span,.rv-scene{ opacity:1 !important; transform:none !important; transition:none !important }
-  .aurora,.p-status i,.chip-wait i{ animation:none !important }
+  .p-status i,.chip-wait i{ animation:none !important }
   .p-ico{ opacity:1 }
 }
 

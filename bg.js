@@ -1,7 +1,7 @@
 import { createShapeWaves } from './shape-waves.js'
 
 // Фон первого экрана: тусклое поле фигур, которое под курсором вспыхивает цветом логотипа.
-// Без WebGPU остаётся прежний фон с точками.
+// Пока поле загружается и в браузере без WebGPU первый экран просто тёмный.
 const hero = document.querySelector('.hero')
 const root = document.getElementById('waves')
 
@@ -24,7 +24,6 @@ if (hero && root) {
     glow: 0.3,
     intro: true,
     introDuration: 1.8,
-    onReady: () => hero.classList.add('has-waves'),
-    onError: error => console.info('[фон] ' + error.message + ', остаётся запасной фон')
+    onError: error => console.info('[фон] ' + error.message + ', первый экран остаётся тёмным')
   })
 }

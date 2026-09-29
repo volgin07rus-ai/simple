@@ -23,7 +23,6 @@
   const panel = tilt.querySelector('.panel')
   const glare = document.createElement('i')
   panel.querySelector('.glare')?.append(glare)
-  const spot = hero.querySelector('.spot')
   const narrow = innerWidth <= 640
   const base = narrow ? { rx: 5, ry: -8 } : { rx: 6, ry: -14 }
   const cur = { rx: 22, ry: -34, gx: 30, gy: 20 }   // стартовый разворот, панель «доворачивается» при появлении
@@ -43,11 +42,6 @@
       target.rx = base.rx - ny * 7
       target.gx = 50 + nx * 40
       target.gy = 40 + ny * 40
-      // пятно света под курсором видно только без поля фигур; переменные у самого пятна, а не у всего экрана
-      if (spot && !hero.classList.contains('has-waves')) {
-        spot.style.setProperty('--mx', e.clientX + 'px')
-        spot.style.setProperty('--my', e.clientY + 'px')
-      }
       wake()
     })
     document.addEventListener('pointerleave', () => {
