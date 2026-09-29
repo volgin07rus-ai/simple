@@ -574,9 +574,11 @@ html::-webkit-scrollbar{ display:none }
   display:grid; grid-template-columns:3.2rem 1fr; gap:1.2rem; align-items:start;
   padding:1.8rem 0; border-bottom:1px solid var(--line);
 }
+/* появление строки без размытия: размытие широкой строки видеокарта пересчитывала каждый кадр появления,
+   и на ноутбуках со встроенной графикой при входе в блок проседали кадры */
 .fit-row[data-reveal]{
-  opacity:0; transform:translateY(18px); filter:blur(4px);
-  transition:opacity .8s var(--ease-out) var(--d,0ms), transform .8s var(--ease-out) var(--d,0ms), filter .8s var(--ease-out) var(--d,0ms);
+  opacity:0; transform:translateY(18px);
+  transition:opacity .8s var(--ease-out) var(--d,0ms), transform .8s var(--ease-out) var(--d,0ms);
 }
 .fit-row.is-in{ opacity:1; transform:none; filter:none }
 .fit-no{ padding-top:.3rem; font-size:.85rem; color:var(--faint); font-variant-numeric:tabular-nums; transition:color .6s var(--ease-quart) }
@@ -592,8 +594,8 @@ html::-webkit-scrollbar{ display:none }
 /* Решение занимает место сразу, чтобы при прокрутке ничего не прыгало, и до своей очереди едва видно */
 .fit-fix{
   margin-top:.8rem; font-size:1.02rem; line-height:1.5; color:var(--ink);
-  opacity:.16; transform:translateY(6px); filter:blur(2px);
-  transition:opacity .7s var(--ease-quart), transform .8s var(--ease-quart), filter .7s var(--ease-quart);
+  opacity:.16; transform:translateY(6px);
+  transition:opacity .7s var(--ease-quart), transform .8s var(--ease-quart);
 }
 .fit-fix b{ font-weight:600; color:var(--lime) }
 
@@ -1458,13 +1460,15 @@ main{ position:relative }
 .dm{
   position:absolute; left:50%; top:50%; width:30em; height:20em; margin:-10em 0 0 -15em;
   color:var(--ink); line-height:1.35;
-  transition:opacity .5s var(--ease-quart), filter .5s var(--ease-quart), transform .6s var(--ease-quart);
+  transition:opacity .5s var(--ease-quart), transform .6s var(--ease-quart);
 }
-.dm.is-pre{ opacity:0; filter:blur(6px); transform:translateY(.6em) }
-.dm.is-out{ opacity:0; filter:blur(6px); transform:scale(.985) }
+/* Сцены сменяются и детали проявляются без размытия: размытие всей сцены видеокарта пересчитывала каждый кадр
+   смены, и на встроенной графике блок «Шесть направлений» проседал раз в несколько секунд */
+.dm.is-pre{ opacity:0; transform:translateY(.6em) }
+.dm.is-out{ opacity:0; transform:scale(.985) }
 .dm p{ margin:0 }
-.dm .q{ opacity:0; transform:translateY(.4em); filter:blur(3px); transition:opacity .6s var(--ease-quart), transform .6s var(--ease-quart), filter .6s var(--ease-quart) }
-.dm .q.on{ opacity:1; transform:none; filter:none }
+.dm .q{ opacity:0; transform:translateY(.4em); transition:opacity .6s var(--ease-quart), transform .6s var(--ease-quart) }
+.dm .q.on{ opacity:1; transform:none }
 .dm-card{
   background:#131511; border:1px solid var(--line-2); border-radius:.7em;
   box-shadow:0 1.2em 2.4em -1.2em rgba(0,0,0,.9), inset 0 1px 0 rgba(255,255,255,.05);
@@ -1496,7 +1500,7 @@ main{ position:relative }
   display:inline-flex; align-items:center; margin-top:1.25em; padding:.75em 1.3em; border-radius:2em;
   background:#141612; color:#F3F5EE; font-size:.56em; font-weight:600;
 }
-.dm .ds-btn.q{ transition:opacity .6s var(--ease-quart), transform .2s var(--ease-quart), filter .6s var(--ease-quart) }
+.dm .ds-btn.q{ transition:opacity .6s var(--ease-quart), transform .2s var(--ease-quart) }
 .dm-site.is-press .ds-btn{ transform:scale(.93) }
 .ds-pic{
   position:absolute; right:1.2em; top:2.7em; width:8.4em; height:11.2em; border-radius:.6em;
@@ -1584,7 +1588,7 @@ main{ position:relative }
 /* сцена собрана по центру: системы сверху, под ними путь заказа и журнал */
 .dm-sync{ display:flex; flex-direction:column; justify-content:center; gap:3.4em }
 .dy-row{ position:relative; display:grid; grid-template-columns:repeat(3, 1fr); gap:1.5em }
-.dm .dy-sys{ position:relative; padding:.9em .9em .7em; transition:opacity .6s var(--ease-quart), transform .6s var(--ease-quart), filter .6s var(--ease-quart), border-color .5s var(--ease-quart) }
+.dm .dy-sys{ position:relative; padding:.9em .9em .7em; transition:opacity .6s var(--ease-quart), transform .6s var(--ease-quart), border-color .5s var(--ease-quart) }
 .dy-sys.is-hot{ border-color:rgba(216,255,50,.55) }
 /* пунктир между системами */
 .dy-sys + .dy-sys::before{ content:""; position:absolute; right:100%; top:50%; width:1.5em; border-top:1px dashed rgba(255,255,255,.2) }
@@ -1706,6 +1710,8 @@ main{ position:relative }
   pointer-events:auto; cursor:pointer;
 }
 .drift-wall.is-dead .drift-wall__tile{ cursor:default }
+/* стена далеко за экраном (drift-wall.js): плитки не отрисовываются и не утяжеляют кадры других блоков */
+.drift-wall.is-far .drift-wall__plane{ content-visibility:hidden }
 .drift-wall__inner{
   position:absolute; inset:calc(var(--dw-gap) / 2); display:block; overflow:hidden;
   border-radius:var(--dw-radius); background:#101210; opacity:var(--dw-dim);
@@ -1788,14 +1794,15 @@ main{ position:relative }
 
 .works-list{ padding-top:1rem }
 .works-grid{ list-style:none; margin:0; padding:0; display:grid; grid-template-columns:1fr 1fr; gap:2.2rem 2rem; align-items:stretch }
+/* карточки появляются без размытия: крупные обложки с размытием тяжело даются встроенной графике */
 .work{
-  opacity:0; transform:translateY(22px); filter:blur(4px);
-  transition:opacity .8s var(--ease-out), transform .8s var(--ease-out), filter .8s var(--ease-out);
+  opacity:0; transform:translateY(22px);
+  transition:opacity .8s var(--ease-out), transform .8s var(--ease-out);
   transition-delay:calc(var(--i,0) * 90ms);
 }
 .work.is-in{ opacity:1; transform:none; filter:none }
-.work.is-entering{ opacity:0; transform:translateY(16px); filter:blur(4px); transition:none }
-.work.is-leaving{ opacity:0; transform:scale(.97); filter:blur(2px); transition:opacity .22s var(--ease-quart), transform .22s var(--ease-quart), filter .22s var(--ease-quart) }
+.work.is-entering{ opacity:0; transform:translateY(16px); transition:none }
+.work.is-leaving{ opacity:0; transform:scale(.97); transition:opacity .22s var(--ease-quart), transform .22s var(--ease-quart) }
 .work{ display:flex }
 .work[hidden]{ display:none }
 

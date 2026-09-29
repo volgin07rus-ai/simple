@@ -10,7 +10,8 @@ const openLabel = window.workOpenLabel || (() => 'Открыть')
 if (root && WORKS.length) {
   createDriftWall(root, {
     items: WORKS.map(w => ({
-      image: `assets/works/${w.slug}.jpg`,
+      // для стены обложки 720 пикселей в ширину: плитка на ретине не больше, а распаковывать вдвое меньше
+      image: `assets/works/wall/${w.slug}.jpg`,
       title: w.title,
       caption: KINDS[w.kind] || '',
       href: w.live,

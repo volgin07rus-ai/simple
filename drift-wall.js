@@ -389,6 +389,11 @@ export function createDriftWall(container, options = {}) {
     else if (pointerType === 'touch') release()
   }, { rootMargin: '120px 0px' })
   io.observe(container)
+  // Дальше экрана от просмотра плитки стены не участвуют в отрисовке вовсе (класс is-far, content-visibility).
+  // Иначе десятки 3D-плиток браузер учитывал бы при каждой пересборке слоёв страницы, даже когда стена далеко:
+  // это вдвое утяжеляло кадры в других блоках. Возвращаются за экран до того, как стену станет видно
+  const far = new IntersectionObserver(([entry]) => container.classList.toggle('is-far', !entry.isIntersecting), { rootMargin: '100% 0px' })
+  far.observe(container)
 
   build()
 
@@ -398,7 +403,7 @@ export function createDriftWall(container, options = {}) {
       cancelAnimationFrame(raf)
       anims.forEach(a => a.cancel())
       clearTimeout(resizeTimer)
-      io.disconnect(); ro.disconnect()
+      io.disconnect(); ro.disconnect(); far.disconnect()
       container.removeEventListener('pointermove', onPointerMove)
       container.removeEventListener('pointerleave', onPointerLeave)
       container.removeEventListener('click', onClick)
