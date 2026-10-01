@@ -8,6 +8,11 @@
   const hosts = document.querySelectorAll('[data-terminal]')
   if (!hosts.length) return
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches
+  // Экран загрузки (common.js) ждёт первого кадра фона, а символы проявляются, только когда он ушёл.
+  // До этого фон рисуется за экраном пустым: шейдеры собраны, видеокарта прогрета
+  const html = document.documentElement
+  let revealed = !html.classList.contains('is-loading')
+  const ready = state => { if (html.dataset.bg) return; html.dataset.bg = state; dispatchEvent(new Event('simple:bg-ready')) }
   const touch = matchMedia('(pointer: coarse)').matches
   const PAD = 2   // запас клеток по краям: помехи сдвигают строки, свечение заглядывает к соседям
 
@@ -128,7 +133,7 @@ void main(){
     canvas.className = 'bt-term-canvas'
     host.append(canvas)
     const gl = canvas.getContext('webgl', { alpha: true, premultipliedAlpha: true, antialias: false, powerPreference: 'low-power' })
-    if (!gl) { canvas.remove(); return }
+    if (!gl) { canvas.remove(); ready('none'); return }
 
     const program = (fs) => {
       const p = gl.createProgram()
@@ -148,7 +153,7 @@ void main(){
       return { p, u }
     }
     let cells, screen
-    try { cells = program(CELLS); screen = program(SCREEN) } catch (e) { console.info('[терминал] ' + e.message); canvas.remove(); return }
+    try { cells = program(CELLS); screen = program(SCREEN) } catch (e) { console.info('[терминал] ' + e.message); canvas.remove(); ready('none'); return }
 
     gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer())
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW)
@@ -213,8 +218,8 @@ void main(){
 
     function draw(now) {
       const t = reduce ? offset * o.timeScale : (now * 0.001 + offset) * o.timeScale
-      if (!loadStart) loadStart = now
-      const load = reduce ? 1 : Math.min(1, (now - loadStart) / 2000)
+      if (revealed && !loadStart) loadStart = now
+      const load = reduce ? 1 : revealed ? Math.min(1, (now - loadStart) / 2000) : 0
       smooth.x += (mouse.x - smooth.x) * 0.08
       smooth.y += (mouse.y - smooth.y) * 0.08
       // проход 1: яркость клеток в маленькую текстуру
@@ -235,6 +240,7 @@ void main(){
       gl.clearColor(0, 0, 0, 0)
       gl.clear(gl.COLOR_BUFFER_BIT)
       gl.drawArrays(gl.TRIANGLES, 0, 3)
+      ready('ready')
     }
 
     function tick(now) {
@@ -260,6 +266,7 @@ void main(){
     resize()
     new ResizeObserver(resize).observe(host)
     addEventListener('simple:lite', resize)
+    addEventListener('simple:revealed', () => { revealed = true; loadStart = 0; kick() }, { once: true })
     new IntersectionObserver(([e]) => { visible = e.isIntersecting; kick() }).observe(host)
     document.addEventListener('visibilitychange', kick)
     addEventListener('mousemove', e => {

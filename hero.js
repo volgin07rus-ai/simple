@@ -2,7 +2,7 @@
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches
   const finePointer = matchMedia('(hover: hover) and (pointer: fine)').matches
 
-  /* ---------- Старт после загрузки шрифтов ---------- */
+  /* ---------- Старт: когда ушёл экран загрузки (common.js), а без него после загрузки шрифтов ---------- */
   const hero = document.querySelector('.hero')
   let started = false
   function start() {
@@ -12,8 +12,13 @@
     if (!reduce) playIntro()
     runFlow()
   }
-  document.fonts.ready.then(start)
-  setTimeout(start, 3000)
+  if (document.documentElement.classList.contains('is-loading')) {
+    addEventListener('simple:revealed', start, { once: true })
+    setTimeout(start, 10000)
+  } else {
+    document.fonts.ready.then(start)
+    setTimeout(start, 3000)
+  }
 
   /* ---------- 3D-наклон панели за курсором ---------- */
   // Наклон ставим прямо в transform, а блик двигаем сдвигом: так кадр не пересчитывает стили всей панели

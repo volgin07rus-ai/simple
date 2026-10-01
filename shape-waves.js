@@ -347,6 +347,9 @@ export function createShapeWaves(root, options = {}) {
   let resizeObserver
   let visibilityObserver
   let wakeRenderer = () => {}
+  // настройки после запуска (например, заставку по сигналу страницы) применяет update(); до готовности поля
+  // они просто ложатся в settings и подхватываются при первой настройке
+  let applyLater = null
   const pointer = { x: 0, y: 0, at: 0, inside: false }
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
   const maskCanvas = document.createElement('canvas')
@@ -678,6 +681,7 @@ export function createShapeWaves(root, options = {}) {
       }
 
       const applySettings = () => {
+        applyLater = applySettings
         if (disposed || failed) return
         configureGrid()
         params.set({
@@ -743,7 +747,7 @@ export function createShapeWaves(root, options = {}) {
     }
   })()
 
-  return () => {
+  const dispose = () => {
     disposed = true
     wakeRenderer = () => {}
     document.removeEventListener('visibilitychange', handleWake)
@@ -759,4 +763,9 @@ export function createShapeWaves(root, options = {}) {
     chargeBuffer?.destroy()
     gpu?.dispose()
   }
+  dispose.update = patch => {
+    Object.assign(settings, patch)
+    if (!disposed && !failed) applyLater?.()
+  }
+  return dispose
 }

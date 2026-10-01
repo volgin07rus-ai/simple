@@ -2,11 +2,17 @@ import { createShapeWaves } from './shape-waves.js'
 
 // Фон первого экрана: тусклое поле фигур, которое под курсором вспыхивает цветом логотипа.
 // Пока поле загружается и в браузере без WebGPU первый экран просто тёмный.
+// С экраном загрузки (common.js) поле собирается и рисует первые кадры за ним, целиком и без заставки:
+// так видеокарта успевает прогреться. Заставка поля начинается, когда экран загрузки уходит (simple:revealed)
 const hero = document.querySelector('.hero')
 const root = document.getElementById('waves')
 
 if (hero && root) {
-  createShapeWaves(root, {
+  const html = document.documentElement
+  const gated = html.classList.contains('is-loading')
+  // экран загрузки ждёт первых кадров поля; если поле не запустилось, ждать нечего
+  const ready = state => { html.dataset.bg = state; dispatchEvent(new Event('simple:bg-ready')) }
+  const waves = createShapeWaves(root, {
     shapes: 'mixed',
     cellSize: 10,
     dotSize: 0.72,
@@ -22,8 +28,10 @@ if (hero && root) {
     splashRadius: 32,
     splashStrength: 0.3,
     glow: 0.3,
-    intro: true,
+    intro: !gated,
     introDuration: 1.8,
-    onError: error => console.info('[фон] ' + error.message + ', первый экран остаётся тёмным')
+    onReady: () => ready('ready'),
+    onError: error => { console.info('[фон] ' + error.message + ', первый экран остаётся тёмным'); ready('none') }
   })
+  if (gated) addEventListener('simple:revealed', () => waves.update({ intro: true }), { once: true })
 }

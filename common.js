@@ -155,7 +155,54 @@
     }
     requestAnimationFrame(step)
   }
-  addEventListener('load', () => setTimeout(() => sample(3000), 1200))
+  // за экраном загрузки первый замер ждёт, пока он уйдёт: мерить нужно открытый сайт, а не его сборку
+  if (root.classList.contains('is-loading')) addEventListener('simple:revealed', () => setTimeout(() => sample(3000), 600), { once: true })
+  else addEventListener('load', () => setTimeout(() => sample(3000), 1200))
+
+  /* ---------- Экран загрузки (главная и бриф) ---------- */
+  // Пока экран закрывает страницу, за ним собирается фон первого экрана: видеокарта готовит шейдеры и рисует
+  // первые кадры, грузятся шрифты, строятся блоки ниже. Раньше это шло одновременно с заставками первого экрана,
+  // и они подтормаживали. Полоска идёт по настоящим шагам: шрифты, потом первые кадры фона (событие simple:bg-ready
+  // из bg.js или terminal.js). Когда всё готово, экран плавно уходит, и звучит simple:revealed: по нему стартуют
+  // заставки (hero.js, bg.js, blocks.js, terminal.js), а фоны ниже по странице подключаются ещё позже (pixels.js).
+  // Фон не ждём, если первого экрана не видно (переход по якорю) или поле не запустилось; дольше 6 секунд не ждём вовсе.
+  // Первый раз за визит экран держится не меньше 0,8 секунды, чтобы не мелькнуть, дальше уходит сразу, как всё готово
+  const loader = document.getElementById('loader')
+  if (loader && root.classList.contains('is-loading')) {
+    const fill = loader.querySelector('.loader-line i')
+    const progress = p => fill && fill.style.setProperty('--p', p)
+    const still = matchMedia('(prefers-reduced-motion: reduce)').matches
+    const seen = read('sessionStorage', 'simple-loaded')
+    const minShow = still ? 0 : seen ? 250 : 800
+    const t0 = performance.now()
+    requestAnimationFrame(() => progress(0.3))
+
+    const scene = document.querySelector('[data-loader-bg]')
+    const onScreen = () => { const r = scene.getBoundingClientRect(); return r.bottom > 0 && r.top < innerHeight }
+    const needBg = !!scene && (!location.hash || location.hash === '#top') && onScreen()
+    const bgReady = new Promise(done => {
+      if (!needBg || root.dataset.bg) return done()
+      const finish = () => { removeEventListener('scroll', away); done() }
+      // страницу прокрутили, пока она грузилась: фон первого экрана уже не нужен
+      const away = () => { if (!onScreen()) finish() }
+      addEventListener('simple:bg-ready', finish, { once: true })
+      addEventListener('scroll', away, { passive: true })
+    })
+    const fontsReady = (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => progress(needBg ? 0.62 : 0.9))
+    // после первых кадров фона ещё два кадра: видеокарта уже прогрета, когда начнутся заставки
+    const settled = () => new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done)))
+    Promise.race([Promise.all([fontsReady, bgReady]).then(settled), new Promise(done => setTimeout(done, 6000))]).then(() => {
+      progress(1)
+      setTimeout(reveal, Math.max(still ? 0 : 380, minShow - (performance.now() - t0)))
+    })
+    function reveal() {
+      if (root.classList.contains('is-loaded')) return
+      root.classList.add('is-loaded')
+      root.classList.remove('is-loading')
+      store('sessionStorage', 'simple-loaded', '1')
+      dispatchEvent(new Event('simple:revealed'))
+    }
+  }
   addEventListener('scroll', function first() {
     removeEventListener('scroll', first)
     setTimeout(() => sample(3000), 200)

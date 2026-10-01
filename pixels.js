@@ -398,7 +398,7 @@ void main(){
   }, { rootMargin: '120px 0px' })
   hosts.forEach(h => io.observe(h))
   const idle = window.requestIdleCallback ? fn => requestIdleCallback(fn, { timeout: 2000 }) : fn => setTimeout(fn, 200)
-  addEventListener('load', () => setTimeout(() => {
+  const mountAll = () => {
     const queue = [...hosts]
     const next = () => {
       const h = queue.shift()
@@ -410,7 +410,10 @@ void main(){
       idle(next)
     }
     idle(next)
-  }, 600))
+  }
+  // с экраном загрузки ждём, пока отыграют заставки первого экрана: сборка шейдеров не должна им мешать
+  if (document.documentElement.classList.contains('is-loading')) addEventListener('simple:revealed', () => setTimeout(mountAll, 2600), { once: true })
+  else addEventListener('load', () => setTimeout(mountAll, 600))
 
   // Пока горит след, кадр на каждом обновлении экрана; в покое следующий кадр заказываем таймером,
   // чтобы страница не просыпалась 60–165 раз в секунду ради кадров, которые всё равно пропускаются
