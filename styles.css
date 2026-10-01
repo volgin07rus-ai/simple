@@ -75,6 +75,8 @@ a{ color:inherit; text-decoration:none }
 :focus-visible{ outline:2px solid var(--lime); outline-offset:3px; border-radius:.4rem }
 /* переход по якорю с другой страницы: блок встаёт под шапку, а не за неё (по ссылкам на этой странице едет common.js) */
 section[id],main{ scroll-margin-top:5rem }
+/* метки для адресов прежнего сайта (#about, #partners): невидимые, стоят в начале своего блока */
+.anchor-alias{ position:absolute; top:0; left:0; width:1px; height:1px; scroll-margin-top:5rem; pointer-events:none }
 /* блок получает фокус после переезда, чтобы клавиатура продолжала с него; рамка вокруг всего блока не нужна */
 section[tabindex="-1"]:focus,main[tabindex="-1"]:focus{ outline:none }
 
@@ -1888,10 +1890,16 @@ main{ position:relative }
 .doc li::marker{ color:var(--lime) }
 .doc a{ color:var(--lime); text-decoration:underline; text-decoration-color:rgba(216,255,50,.45); text-underline-offset:.2em }
 .hoverable .doc a:hover{ text-decoration-color:var(--lime) }
+/* реквизиты оператора в политике: подпись слева, значение справа; на телефоне друг под другом */
+.doc-facts{ display:grid; grid-template-columns:minmax(0,15rem) minmax(0,1fr); gap:.55rem 1.5rem; margin:0; font-size:1.02rem; line-height:1.55 }
+.doc-facts dt{ color:var(--faint) }
+.doc-facts dd{ margin:0; color:var(--ink) }
 .doc .doc-more{ margin-top:2.6rem; padding-top:1.4rem; border-top:1px solid var(--line) }
 @media (max-width:640px){
   .page-doc .doc{ padding:6.5rem 0 3rem }
   .doc-h1{ font-size:2.05rem }
   .doc h2{ font-size:1.15rem }
   .doc p,.doc li{ font-size:.98rem }
+  .doc-facts{ grid-template-columns:1fr; gap:.15rem }
+  .doc-facts dd + dt{ margin-top:.7rem }
 }

@@ -10,9 +10,11 @@
   const $ = (s, r = document) => r.querySelector(s)
   const $$ = (s, r = document) => [...r.querySelectorAll(s)]
 
-  // Приёмник заявок живёт на tz.simplemind.ru и принимает запросы только со своего домена.
-  // Поэтому страницу выкладываем туда: тогда адрес относительный. С другого домена нужен доступ на сервере
-  const ENDPOINT = location.hostname === 'tz.simplemind.ru' ? '/api/brief' : 'https://tz.simplemind.ru/api/brief'
+  // Приёмник заявок — служба брифа на сервере Simple. На simplemind.ru и tz.simplemind.ru nginx отдаёт её
+  // по адресу /api/brief на том же домене, поэтому браузер спокойно читает ответ. С других адресов (копия
+  // на volgin.site) запрос уходит на tz.simplemind.ru: заявка сохранится, но прочитать ответ браузер не даст
+  const SAME_SITE = ['simplemind.ru', 'www.simplemind.ru', 'tz.simplemind.ru'].includes(location.hostname)
+  const ENDPOINT = SAME_SITE ? '/api/brief' : 'https://tz.simplemind.ru/api/brief'
   const MAX_FILE_MB = 50
   const SAVE_KEY = 'simple-brief-v1'
 
