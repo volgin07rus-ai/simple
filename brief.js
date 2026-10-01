@@ -27,6 +27,7 @@
     rules: $('[data-rules]'), consent: $('[data-consent]'), privacy: $('[data-privacy]'),
     submit: $('[data-submit]'), note: $('[data-note]'), done: $('[data-done]'), doneId: $('[data-done-id]'),
     restored: $('[data-restored]'),
+    fallback: $('[data-fallback]'), copy: $('[data-copy]'), mail: $('[data-mail]'), tg: $('[data-tg]'),
   }
 
   /* ---------- Сохранение ответов в браузере ---------- */
@@ -376,6 +377,55 @@
     return { url: 'https://simplemind.ru/', host: 'simplemind.ru' }
   }
 
+  /* ---------- Запасной путь: анкета одним текстом ---------- */
+  // Если сервер не ответил или не принял заявку, человек отправляет ответы сам: в Telegram или письмом.
+  // Текст собирается в момент нажатия, поэтому в нём всё, что поправили после ошибки
+  function asText() {
+    const p = payload()
+    const block = (title, part) => {
+      const rows = Object.values(part).map(({ question, answer }) => `• ${question}\n${answer}`)
+      return rows.length ? `${title}\n${rows.join('\n\n')}` : ''
+    }
+    return [
+      `Анкета с сайта Simple: ${p.project_type_title}`,
+      block('Задача', p.main),
+      block('Подробности', p.extra),
+      block('Сроки', p.timeline),
+      `Контакт: ${p.contact.method_title}, ${p.contact.value}`,
+      p.files.length ? `Файлы: ${p.files.map(f => f.name).join(', ')} (приложите их к сообщению)` : ''
+    ].filter(Boolean).join('\n\n')
+  }
+  async function copyText(text) {
+    try { await navigator.clipboard.writeText(text); return true } catch {}
+    // старые браузеры и страницы без https: через скрытое поле
+    const area = document.createElement('textarea')
+    area.value = text
+    area.setAttribute('readonly', '')
+    area.style.cssText = 'position:fixed; left:-9999px; opacity:0'
+    document.body.append(area)
+    area.select()
+    let ok = false
+    try { ok = document.execCommand('copy') } catch {}
+    area.remove()
+    return ok
+  }
+  let copiedTimer = 0
+  function copied(ok) {
+    clearTimeout(copiedTimer)
+    els.copy.textContent = ok ? 'Скопировано' : 'Не получилось скопировать'
+    copiedTimer = setTimeout(() => { els.copy.textContent = 'Скопировать ответы' }, 2400)
+  }
+  // в письмо текст кладётся целиком, если адрес письма не выходит слишком длинным; иначе он уже скопирован
+  function mailHref(text) {
+    const head = 'mailto:info@simplemind.ru?subject=' + encodeURIComponent('Анкета с сайта Simple') + '&body='
+    const full = head + encodeURIComponent(text)
+    return full.length < 1900 ? full : head + encodeURIComponent('Ответы анкеты скопированы, вставьте их сюда')
+  }
+  els.copy?.addEventListener('click', () => copyText(asText()).then(copied))
+  // ссылки на Telegram и почту сразу копируют ответы: в чате их остаётся только вставить
+  els.tg?.addEventListener('click', () => { copyText(asText()).then(copied) })
+  els.mail?.addEventListener('click', () => { const text = asText(); els.mail.href = mailHref(text); copyText(text).then(copied) })
+
   async function submit(e) {
     e.preventDefault()
     if (state.sent || !validate()) return
@@ -388,10 +438,11 @@
     try {
       const res = await fetch(ENDPOINT, { method: 'POST', body })
       const data = await res.json().catch(() => ({}))
-      if (!res.ok || !data.ok) throw new Error(data.error || `сервер ответил ${res.status}`)
+      if (!res.ok || !data.ok) throw Object.assign(new Error(data.error || `сервер ответил ${res.status}`), { server: true })
       // успех показываем только после настоящего сохранения на сервере
       state.sent = true
       forget()
+      if (els.fallback) els.fallback.hidden = true
       form.hidden = true
       if (els.restored) els.restored.hidden = true
       els.doneId.textContent = data.id ? `Номер заявки: ${data.id}` : ''
@@ -400,7 +451,12 @@
       els.done.scrollIntoView({ block: 'center', behavior: reduce ? 'auto' : 'smooth' })
     } catch (error) {
       els.submit.disabled = false
-      note(`Не удалось отправить: ${error.message}. Ответы сохранены, попробуйте ещё раз`, true)
+      // сеть или сервер, который не принимает запросы с этого адреса, дают только «Failed to fetch»: человеку это ничего не говорит
+      note(error.server ? `Не получилось отправить анкету: ${error.message}` : 'Не получилось отправить анкету', true)
+      if (els.fallback) {
+        els.mail.href = mailHref(asText())
+        els.fallback.hidden = false
+      }
     } finally {
       form.classList.remove('is-sending')
     }
