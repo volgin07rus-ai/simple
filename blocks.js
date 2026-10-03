@@ -125,16 +125,31 @@
   }
 
   /* ---------- 3. Узнаёте свою ситуацию: проблема зачёркивается, под ней проявляется решение ---------- */
-  // Ничего нажимать не нужно: строка доходит до середины экрана и «решается», обратно не откатывается
+  // Ничего нажимать не нужно: строка поднимается в верхнюю часть экрана и «решается», обратно не откатывается.
+  // Зачёркивание ждёт, пока строку успеют прочитать: она должна пробыть на экране не меньше READ мс.
+  // Раньше строка зачёркивалась, едва дойдя до середины экрана, и прочитать её до зачёркивания не успевали
   const fitRows = [...document.querySelectorAll('.fit-row[data-fit]')]
   if (reduce) fitRows.forEach(r => r.classList.add('is-done'))
   else if (fitRows.length) {
-    const solve = new IntersectionObserver(entries => entries.forEach(e => {
+    const READ = 1800
+    const shownAt = new Map(), timers = new Map()
+    const seen = new IntersectionObserver(entries => entries.forEach(e => {
+      if (e.isIntersecting && !shownAt.has(e.target)) shownAt.set(e.target, performance.now())
+    }), { threshold: 0.6 })
+    const solve = row => {
+      row.classList.add('is-done')
+      seen.unobserve(row)
+      zone.unobserve(row)
+    }
+    // зона: верхние 40% экрана. Ушла строка из зоны до срока, ждём её возвращения
+    const zone = new IntersectionObserver(entries => entries.forEach(e => {
+      const row = e.target
+      clearTimeout(timers.get(row))
       if (!e.isIntersecting) return
-      e.target.classList.add('is-done')
-      solve.unobserve(e.target)
-    }), { rootMargin: '0px 0px -42% 0px' })
-    fitRows.forEach(r => solve.observe(r))
+      const wait = Math.max(0, READ - (performance.now() - (shownAt.get(row) ?? performance.now())))
+      timers.set(row, setTimeout(() => solve(row), wait))
+    }), { rootMargin: '0px 0px -60% 0px' })
+    fitRows.forEach(r => { seen.observe(r); zone.observe(r) })
   }
   /* ---------- 6. Как идёт задача: шаги по кругу и наклон карточек за курсором ---------- */
   // На компьютере с мышью шаги загораются по кругу сами, наведение делает карточку текущей и ставит круг на паузу.

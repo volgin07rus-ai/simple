@@ -621,7 +621,7 @@ html::-webkit-scrollbar{ display:none }
 }
 .fit-fix b{ font-weight:600; color:var(--lime) }
 
-/* строка дошла до середины экрана: проблема решена */
+/* строка поднялась в верхнюю часть экрана и провисела достаточно, чтобы её прочитать (blocks.js): проблема решена */
 .fit-row.is-done .fit-pain > span{ background-size:100% .085em; color:var(--muted) }
 .fit-row.is-done .fit-fix{ opacity:1; transform:none; filter:none; transition-delay:.45s }
 .fit-row.is-done .fit-no{ color:var(--lime) }
