@@ -6,10 +6,25 @@
   <!-- экран загрузки показывается, только если работает JavaScript (common.js убирает его, когда фон готов).
        Страховка: через 9 секунд страница открывается в любом случае -->
   <script>(function(r){r.classList.add('is-loading');setTimeout(function(){if(r.classList.contains('is-loaded'))return;r.classList.add('is-loaded');r.classList.remove('is-loading');dispatchEvent(new Event('simple:revealed'))},9000)})(document.documentElement)</script>
-  <title>Simple: автоматизация бизнеса, которая работает сама</title>
-  <meta name="description" content="Автоматизируем заявки, счета, документы и ответы клиентам: дальше процесс работает сам, почти без участия людей. Ещё делаем сайты, ботов и интеграции. Цена фиксируется до старта" />
+  <title>Simple Mind: автоматизация бизнеса, которая работает сама</title>
+  <meta name="description" content="Simple Mind автоматизирует заявки, счета, документы и ответы клиентам: дальше процесс работает сам, почти без участия людей. Ещё делаем сайты, ботов и интеграции. Цена фиксируется до старта" />
   <link rel="canonical" href="https://simplemind.ru/" />
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="assets/logo-512.png" />
+  <meta name="theme-color" content="#070807" />
+  <!-- превью ссылки в мессенджерах и соцсетях -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Simple Mind" />
+  <meta property="og:locale" content="ru_RU" />
+  <meta property="og:url" content="https://simplemind.ru/" />
+  <meta property="og:title" content="Simple Mind: процессы идут сами" />
+  <meta property="og:description" content="Автоматизируем заявки, счета, документы и ответы клиентам. Без ручной работы: людям почти не приходится вмешиваться" />
+  <meta property="og:image" content="https://simplemind.ru/assets/og.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <!-- название сайта и компании для поисковиков: «Simple Mind», «SimpleMind», «Симпл Майнд» -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebSite","@id":"https://simplemind.ru/#website","url":"https://simplemind.ru/","name":"Simple Mind","alternateName":["SimpleMind","Simple","Симпл Майнд"],"inLanguage":"ru-RU","publisher":{"@id":"https://simplemind.ru/#organization"}},{"@type":"Organization","@id":"https://simplemind.ru/#organization","name":"Simple Mind","alternateName":["SimpleMind","Simple","Симпл Майнд"],"url":"https://simplemind.ru/","logo":"https://simplemind.ru/assets/logo-512.png","image":"https://simplemind.ru/assets/og.png","description":"Автоматизация процессов бизнеса: заявки, счета, документы и ответы клиентам. Сайты, боты, интеграции и AI","email":"info@simplemind.ru","telephone":"+7-925-555-82-90","sameAs":["https://t.me/simple_ai_team"]}]}</script>
   <link rel="preload" href="assets/fonts/onest-cyrillic.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="assets/fonts/onest-latin.woff2" as="font" type="font/woff2" crossorigin />
   <!-- фон первого экрана — модуль, который подключает ещё два файла. Без подсказки браузер узнаёт о них по цепочке,
@@ -659,7 +674,7 @@
       <div class="ftr-bottom">
         <p>ИП Вязгин · ОГРНИП 304280112700192 · ИНН 280100638001</p>
         <a href="privacy.html">Политика обработки персональных данных</a>
-        <p>© 2026 Simple · Твой швейцарский нож в бизнесе</p>
+        <p>© 2026 Simple Mind · Твой швейцарский нож в бизнесе</p>
       </div>
     </div>
   </footer>

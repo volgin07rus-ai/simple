@@ -6,10 +6,23 @@
   <!-- экран загрузки показывается, только если работает JavaScript (common.js убирает его, когда фон готов).
        Страховка: через 9 секунд страница открывается в любом случае -->
   <script>(function(r){r.classList.add('is-loading');setTimeout(function(){if(r.classList.contains('is-loaded'))return;r.classList.add('is-loaded');r.classList.remove('is-loading');dispatchEvent(new Event('simple:revealed'))},9000)})(document.documentElement)</script>
-  <title>Бриф на проект: Simple</title>
+  <title>Бриф на проект: Simple Mind</title>
   <meta name="description" content="Расскажите о задаче своими словами: сайт, бот, автоматизация или свой сервис. Мы зададим только нужные вопросы, оценим сложность и назовём цену и срок" />
   <link rel="canonical" href="https://simplemind.ru/brief.html" />
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="assets/logo-512.png" />
+  <meta name="theme-color" content="#070807" />
+  <!-- превью ссылки в мессенджерах и соцсетях -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Simple Mind" />
+  <meta property="og:locale" content="ru_RU" />
+  <meta property="og:url" content="https://simplemind.ru/brief.html" />
+  <meta property="og:title" content="Бриф на проект: Simple Mind" />
+  <meta property="og:description" content="Расскажите о задаче своими словами: сайт, бот, автоматизация или свой сервис. Мы зададим только нужные вопросы, оценим сложность и назовём цену и срок" />
+  <meta property="og:image" content="https://simplemind.ru/assets/og.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
   <link rel="preload" href="assets/fonts/onest-cyrillic.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="assets/fonts/onest-latin.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="stylesheet" href="styles.css" />
@@ -239,7 +252,7 @@
       <div class="ftr-bottom">
         <p>ИП Вязгин · ОГРНИП 304280112700192 · ИНН 280100638001</p>
         <a href="privacy.html">Политика обработки персональных данных</a>
-        <p>© 2026 Simple · Твой швейцарский нож в бизнесе</p>
+        <p>© 2026 Simple Mind · Твой швейцарский нож в бизнесе</p>
       </div>
     </div>
   </footer>

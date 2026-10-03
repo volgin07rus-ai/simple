@@ -1,0 +1,8 @@
+User-agent: *
+Disallow: /api/
+
+User-agent: Yandex
+Disallow: /api/
+Clean-param: quality&from
+
+Sitemap: https://simplemind.ru/sitemap.xml
