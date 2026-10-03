@@ -174,7 +174,7 @@
         head.setAttribute('cx', pt.x)
         head.setAttribute('cy', pt.y)
       }
-      // где сейчас голова провода на странице: по ней на телефоне загораются шаги «Что происходит после подключения»
+      // где сейчас голова провода на странице: по ней на телефоне загораются шаги «Что происходит с вашей задачей»
       document.dispatchEvent(new CustomEvent('wirehead', { detail: top + pt.y }))
     }
     hub.classList.toggle('is-wired', shown > 1)

@@ -50,7 +50,7 @@
   if (document.documentElement.classList.contains('is-loading')) addEventListener('simple:revealed', watchReveal, { once: true })
   else watchReveal()
 
-  /* ---------- 2. Три позиции стекаются в одну подписку ---------- */
+  /* ---------- 2. Три позиции на рутине стекаются в одного бота ---------- */
   const merge = document.getElementById('merge')
   if (merge) {
     const svg = document.getElementById('merge-wires')
@@ -72,13 +72,13 @@
         const r = role.getBoundingClientRect()
         let d
         if (!vertical) {
-          // Кривая от правого края роли к левому краю подписки; входы чуть разнесены
+          // Кривая от правого края роли к левому краю карточки Simple; входы чуть разнесены
           const x1 = r.right - box.left, y1 = r.top - box.top + r.height / 2
           const x2 = hubL, y2 = hubCy + (i - 1) * 16
           const dx = (x2 - x1) * 0.55
           d = `M${x1} ${y1} C${x1 + dx} ${y1},${x2 - dx} ${y2},${x2} ${y2}`
         } else {
-          // Телефон: из роли влево на общую линию, по ней вниз и в подписку
+          // Телефон: из роли влево на общую линию, по ней вниз и в карточку Simple
           const trunk = 18 - i * 0   // все три потока идут по одной линии
           const x1 = r.left - box.left, y1 = r.top - box.top + r.height / 2
           const rad = 10
@@ -136,7 +136,7 @@
     }), { rootMargin: '0px 0px -42% 0px' })
     fitRows.forEach(r => solve.observe(r))
   }
-  /* ---------- 6. Как устроен месяц: шаги по кругу и наклон карточек за курсором ---------- */
+  /* ---------- 6. Как идёт задача: шаги по кругу и наклон карточек за курсором ---------- */
   // На компьютере с мышью шаги загораются по кругу сами, наведение делает карточку текущей и ставит круг на паузу.
   // На телефоне и планшете шаги ведёт прокрутка: карточка загорается, когда до неё доходит голова провода
   // через весь сайт (wire.js), полоска внизу карточки идёт вместе с головой. Касания ничего не запускают
@@ -170,7 +170,7 @@
       if (mode !== 'timer') return
       if (hovered || !visible || document.hidden) { timer = setTimeout(next, 400); return }
       if (step >= cards.length - 1) {
-        // месяц пройден: загорается петля, потом всё сначала
+        // путь пройден: загорается петля, потом всё сначала
         cards.forEach(c => { c.classList.remove('is-on'); c.classList.add('is-past') })
         howBoard.classList.add('is-loop')
         step = cards.length
