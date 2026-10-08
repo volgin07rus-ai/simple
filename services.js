@@ -1,6 +1,7 @@
 // 4. Что делаем: шесть направлений, справа живая сцена выбранного.
 // На ноутбуке направления сменяют друг друга сами, пока посетитель не выберет своё.
-// На телефоне экран встаёт внутрь открытого пункта, и пункты сами не переключаются
+// На телефоне и планшете экран встаёт внутрь открытого пункта. Пункты тоже сменяются сами, пока посетитель смотрит
+// на открытый: камера плавно съезжает к следующему, как при нажатии
 (() => {
   const root = document.getElementById('services')
   if (!root) return
@@ -338,8 +339,12 @@
       await DEMOS[key].play(el, t)
       if (reduce) return
       await t.wait(tail)
-      if (!touched && !narrow.matches) show((current + 1) % items.length)
-      else if (++replays <= 2) play(key)
+      if (!touched && !narrow.matches) return show((current + 1) % items.length)
+      if (!touched && narrow.matches && current + 1 < items.length) {
+        if (await phoneNext(t)) return
+        return play(key)   // на окно сейчас не смотрят: сцена идёт заново, переключимся, когда вернутся
+      }
+      if (++replays <= 2) play(key)
     } catch (e) { if (e !== STOP) throw e }
   }
 
@@ -366,6 +371,29 @@
   const stopGlide = () => { cancelAnimationFrame(glide); glide = 0 }
   addEventListener('touchstart', stopGlide, { passive: true })
   addEventListener('wheel', stopGlide, { passive: true })
+
+  // Палец на экране или страница ещё едет после прокрутки: в эти моменты пункт сам не переключается.
+  // Своя прокрутка камеры не считается
+  let touching = false, scrolledAt = 0
+  addEventListener('touchstart', () => { touching = true }, { passive: true })
+  addEventListener('touchend', () => { touching = false; scrolledAt = performance.now() }, { passive: true })
+  addEventListener('touchcancel', () => { touching = false }, { passive: true })
+  addEventListener('scroll', () => { if (!glide) scrolledAt = performance.now() }, { passive: true })
+
+  // Телефон и планшет: сцена доиграла, полоска дошла до конца, и открывается следующий пункт. Только если окно сцены
+  // видно хотя бы на две трети, иначе пункты над экраном поменяли бы высоту и страница прыгнула бы под пальцем.
+  // После последнего пункта по кругу не идём: камера уехала бы через весь список наверх (проверка в play)
+  async function phoneNext(t) {
+    for (let waited = 0; touching || performance.now() - scrolledAt < 700; waited += 250) {
+      if (waited >= 4000) return false
+      await t.wait(250)
+    }
+    const r = screen.getBoundingClientRect()
+    const seen = Math.min(r.bottom, innerHeight) - Math.max(r.top, hdr.offsetHeight)
+    if (!r.height || seen < r.height * 0.66) return false
+    openOnPhone(current + 1)
+    return true
+  }
 
   function openOnPhone(i) {
     const it = items[i], btn = it.querySelector('.svc-btn')
