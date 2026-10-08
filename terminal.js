@@ -8,10 +8,10 @@
   const hosts = document.querySelectorAll('[data-terminal]')
   if (!hosts.length) return
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches
-  // Экран загрузки (common.js) ждёт первого кадра фона, а символы проявляются, только когда он ушёл.
-  // До этого фон рисуется за экраном пустым: шейдеры собраны, видеокарта прогрета
+  // Символы проявляются не сразу: сначала фон рисует пустые кадры (шейдеры собраны, видеокарта прогрета),
+  // common.js получает его первый кадр и отвечает simple:revealed, и только тогда символы проступают
   const html = document.documentElement
-  let revealed = !html.classList.contains('is-loading')
+  let revealed = false
   const ready = state => { if (html.dataset.bg) return; html.dataset.bg = state; dispatchEvent(new Event('simple:bg-ready')) }
   const touch = matchMedia('(pointer: coarse)').matches
   const PAD = 2   // запас клеток по краям: помехи сдвигают строки, свечение заглядывает к соседям

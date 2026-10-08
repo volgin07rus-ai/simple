@@ -48,33 +48,6 @@
    и стена работ стоят, пока их не трогают. Здесь: огоньки по линиям второго блока не бегают, линии остаются */
 .calm .merge.is-flowing .comet{ animation:none; opacity:0 }
 
-/* ============ Экран загрузки (главная и бриф) ============ */
-/* Пока он закрывает страницу, за ним собирается фон первого экрана: видеокарта готовит шейдеры и рисует первые
-   кадры, грузятся шрифты. Потом экран плавно уходит, и только тогда начинаются заставки первого экрана (common.js).
-   Анимации здесь только прозрачность и сдвиг: их ведёт видеокарта, и они идут ровно, пока страница занята сборкой.
-   Без JavaScript экрана нет: его включает класс is-loading из скрипта в <head> */
-.loader{ display:none }
-.is-loading .loader,.is-loaded .loader{ position:fixed; inset:0; z-index:300; display:grid; place-items:center; background:var(--bg) }
-html.is-loading{ overflow:hidden }
-.is-loaded .loader{ opacity:0; visibility:hidden; pointer-events:none; transition:opacity .8s var(--ease-quart) .1s, visibility 0s linear .9s }
-.loader-in{ display:grid; justify-items:center; gap:1.5rem }
-.is-loaded .loader-in{ opacity:0; transform:translateY(-.6rem); transition:opacity .45s var(--ease-quart), transform .7s var(--ease-quart) }
-.loader-mark{
-  display:grid; place-items:center; width:4.2rem; height:4.2rem; border-radius:25%;
-  background:#0B0B0B; border:1px solid var(--line-2); color:var(--lime);
-  animation:loader-in .7s var(--ease-quart) both, loader-breathe 1.6s ease-in-out .7s infinite alternate;
-}
-.loader-mark svg{ width:64%; height:64% }
-.loader-line{ width:7.5rem; height:2px; border-radius:2px; overflow:hidden; background:rgba(255,255,255,.1); animation:loader-in .7s var(--ease-quart) .08s both }
-/* полоска идёт по настоящим шагам загрузки: common.js ставит --p */
-.loader-line i{ display:block; height:100%; background:var(--lime); transform-origin:left; transform:scaleX(var(--p, .08)); transition:transform .6s var(--ease-quart) }
-@keyframes loader-in{ from{ opacity:0; transform:translateY(.4rem) } }
-@keyframes loader-breathe{ to{ transform:scale(1.04) } }
-@media (prefers-reduced-motion:reduce){
-  .loader-mark,.loader-line{ animation:none }
-  .loader-line i,.is-loaded .loader,.is-loaded .loader-in{ transition:none }
-}
-
 /* ============ rem-сетка ============ */
 html{ font-size:clamp(12px,1.1111vw,19px) }
 @media (max-width:1024px){ html{ font-size:1.5625vw } }
@@ -447,7 +420,8 @@ html::-webkit-scrollbar{ display:none }
 .rv{ opacity:0; transform:translateY(14px); transition:opacity .9s var(--ease-out), transform .9s var(--ease-out); transition-delay:var(--d,0ms) }
 .ln{ display:block; overflow:hidden; padding-bottom:.14em; margin-bottom:-.14em }
 .ln > span{ display:block; transform:translateY(112%); transition:transform 1s var(--ease-line); transition-delay:var(--d,0ms) }
-.rv-scene{ opacity:0; transition:opacity 1.2s var(--ease-out) .25s }
+/* панель проявляется после замирания при запуске поля фигур (bg.js), иначе её проявление спотыкалось */
+.rv-scene{ opacity:0; transition:opacity 1.2s var(--ease-out) .6s }
 .is-in .rv{ opacity:1; transform:none }
 .is-in .ln > span{ transform:none }
 .is-in .rv-scene{ opacity:1 }

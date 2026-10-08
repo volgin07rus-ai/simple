@@ -45,10 +45,7 @@
       io.unobserve(e.target)
     })
   }, { threshold: 0, rootMargin: '0px 0px -14% 0px' })
-  // за экраном загрузки блоки не появляются: заставка проиграла бы невидимой
-  const watchReveal = () => document.querySelectorAll('[data-reveal]').forEach(el => io.observe(el))
-  if (document.documentElement.classList.contains('is-loading')) addEventListener('simple:revealed', watchReveal, { once: true })
-  else watchReveal()
+  document.querySelectorAll('[data-reveal]').forEach(el => io.observe(el))
 
   /* ---------- 2. Три позиции на рутине стекаются в одного бота ---------- */
   const merge = document.getElementById('merge')

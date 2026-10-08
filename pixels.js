@@ -411,9 +411,8 @@ void main(){
     }
     idle(next)
   }
-  // с экраном загрузки ждём, пока отыграют заставки первого экрана: сборка шейдеров не должна им мешать
-  if (document.documentElement.classList.contains('is-loading')) addEventListener('simple:revealed', () => setTimeout(mountAll, 2600), { once: true })
-  else addEventListener('load', () => setTimeout(mountAll, 600))
+  // ждём, пока соберётся первый экран и отыграют его заставки (common.js): сборка шейдеров не должна им мешать
+  addEventListener('simple:revealed', () => setTimeout(mountAll, 2600), { once: true })
 
   // Пока горит след, кадр на каждом обновлении экрана; в покое следующий кадр заказываем таймером,
   // чтобы страница не просыпалась 60–165 раз в секунду ради кадров, которые всё равно пропускаются

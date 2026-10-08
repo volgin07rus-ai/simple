@@ -2,7 +2,7 @@
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches
   const finePointer = matchMedia('(hover: hover) and (pointer: fine)').matches
 
-  /* ---------- Старт: когда ушёл экран загрузки (common.js), а без него после загрузки шрифтов ---------- */
+  /* ---------- Старт: сразу после загрузки шрифтов ---------- */
   const hero = document.querySelector('.hero')
   let started = false
   function start() {
@@ -12,13 +12,8 @@
     if (!reduce) playIntro()
     runFlow()
   }
-  if (document.documentElement.classList.contains('is-loading')) {
-    addEventListener('simple:revealed', start, { once: true })
-    setTimeout(start, 10000)
-  } else {
-    document.fonts.ready.then(start)
-    setTimeout(start, 3000)
-  }
+  document.fonts.ready.then(start)
+  setTimeout(start, 3000)
 
   /* ---------- 3D-наклон панели за курсором ---------- */
   // Наклон ставим прямо в transform, а блик двигаем сдвигом: так кадр не пересчитывает стили всей панели
@@ -183,7 +178,7 @@
     const pop = fly.animate([
       { transform: `translate3d(${dx}px, ${dy}px, ${z}px) scale(${3.5 / K})`, opacity: 0, filter: 'blur(8px)' },
       { transform: big, opacity: 1, filter: 'blur(0px)' }
-    ], { duration: 900, delay: 450, easing: 'cubic-bezier(.25,1,.5,1)', fill: 'both' })
+    ], { duration: 900, delay: 800, easing: 'cubic-bezier(.25,1,.5,1)', fill: 'both' })   // после замирания при запуске поля (bg.js)
 
     pop.finished.then(() => {
       const land = fly.animate([
