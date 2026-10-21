@@ -46,7 +46,7 @@ npx http-server . -p 5195
 
 Название для поисковиков «Simple Mind» (так набирают адрес simplemind.ru): оно в заголовках страниц, в подвале
 и в разметке schema.org на главной (WebSite и Organization, с вариантами SimpleMind, Simple, Симпл Майнд).
-`robots.txt` и `sitemap.xml` лежат в корне; `googlecde3476f7073e149.html` подтверждает права в Google Search Console, удалять нельзя; в карте адреса как в canonical страниц. Превью ссылки в мессенджерах:
+`robots.txt` и `sitemap.xml` лежат в корне; `googlecde3476f7073e149.html` и `yandex_d0d69ce3fa94e8d0.html` подтверждают права в Google Search Console и Яндекс Вебмастере, удалять нельзя; в карте адреса как в canonical страниц. Превью ссылки в мессенджерах:
 `assets/og.png` (1200×630), логотип для поисковиков и иконка на телефоне: `assets/logo-512.png`.
 
 ## Данные посетителей
