@@ -287,6 +287,8 @@ html::-webkit-scrollbar{ display:none }
   font-size:5.25rem;
 }
 .h1 .accent{ color:var(--lime) }
+/* строка над заголовком первого экрана: часть h1, но тихая, чтобы не спорить с самим заголовком */
+.hero-kicker{ display:block; margin:0 0 1.3rem; font-size:1rem; font-weight:500; line-height:1.4; letter-spacing:.01em; color:var(--muted) }
 .lead{ margin:1.6rem 0 0; max-width:31rem; font-size:1.1rem; line-height:1.55; color:var(--muted) }
 .ctas{ display:flex; flex-wrap:wrap; align-items:center; gap:1.1rem 1.6rem; margin-top:2.4rem }
 .price{ margin:0; display:flex; align-items:center; gap:.8rem }
@@ -1418,6 +1420,8 @@ main{ position:relative }
 .svc-grid{ display:grid; grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr); gap:4rem; align-items:start }
 .svc-list{ list-style:none; margin:0; padding:0; border-top:1px solid var(--line) }
 .svc-item{ position:relative; border-bottom:1px solid var(--line) }
+/* название направления: подзаголовок для поиска, выглядит как раньше */
+.svc-h{ margin:0; font:inherit }
 .svc-btn{
   display:flex; align-items:baseline; gap:1.2rem; width:100%; padding:1.3rem 0;
   background:none; border:0; margin:0; font:inherit; text-align:left; color:var(--muted); cursor:pointer;
