@@ -1,8 +1,11 @@
 // GradientASCII из React Bits без React: градиентный свет, собранный из символов. Свет медленно дышит,
-// под курсором символы перемешиваются, от клика расходится волна. На WebGL2, четыре прохода: поле света
-// в половинном разрешении, ореол в четверти с размытием, итог в полном с символами из атласа.
+// под курсором символы перемешиваются, от клика расходится волна. На WebGL2, пять проходов: поле света
+// в четверти разрешения (оно плавное, мельче не нужно), клетки символов (по точке на клетку), ореол в четверти с размытием, итог в полном
+// с символами из атласа.
 // Дополнено под сайт: шрифт Onest, плотность пикселей ограничена, вне экрана и в скрытой вкладке кадров нет,
-// на слабом компьютере (класс lite, common.js) 30 кадров и без ореола, в спокойном режиме (calm) один кадр.
+// символы считаются по клеткам, а не по пикселям, кадров не больше 30 в секунду (свет движется медленно),
+// а пока под курсором перемешиваются символы, сколько даёт экран. На слабом компьютере (класс lite, common.js)
+// ещё и без ореола и плотность пикселей 1, в спокойном режиме (calm) один кадр.
 // GradientASCII: Copyright (c) 2026 David Haz, React Bits, MIT + Commons Clause
 
 const MAX_COLORS = 8
@@ -195,14 +198,16 @@ void main() {
   outAux = vec4(reveal, scramble, 0.0, 1.0);
 }`
 
-const GLYPHS = `
+// Своё: всё, что зависит только от клетки (какой символ, цвет, мерцание, перемешивание), считается один раз
+// на клетку, в маленькой текстуре размером в число клеток. В исходнике это считалось для каждого пикселя,
+// а в клетке 16 px их сотни. Пиксельным проходам остаётся взять клетку и вырезать из атласа форму символа
+const CELLS = `#version 300 es
+precision highp float;
 uniform sampler2D uField;
 uniform sampler2D uAux;
-uniform sampler2D uAtlas;
 uniform vec2 uResolution;
 uniform vec2 uCell;
 uniform vec2 uOffset;
-uniform vec2 uAtlasGrid;
 uniform float uCount;
 uniform float uDensity;
 uniform float uOpacity;
@@ -211,20 +216,11 @@ uniform float uDepth;
 uniform float uGlyphTime;
 uniform float uSeedValue;
 uniform float uLight;
+layout(location = 0) out vec4 outColor;
+layout(location = 1) out vec4 outGlyph;
 ${COMMON}
-float sampleGlyph(float index, vec2 local, vec2 coord, float soft) {
-  float column = mod(index, uAtlasGrid.x);
-  float row = floor(index / uAtlasGrid.x);
-  vec2 atlasUv = vec2((column + local.x) / uAtlasGrid.x, (row + 1.0 - local.y) / uAtlasGrid.y);
-  vec2 continuous = coord / uAtlasGrid;
-  float scale = exp2(soft);
-  return textureGrad(uAtlas, atlasUv, dFdx(continuous) * scale, dFdy(continuous) * scale).a;
-}
-
-vec4 glyphAt(vec2 px) {
-  vec2 coord = (px - uOffset) / uCell;
-  vec2 cell = floor(coord);
-  vec2 local = coord - cell;
+void main() {
+  vec2 cell = floor(gl_FragCoord.xy);
   vec2 uv = clamp(((cell + 0.5) * uCell + uOffset) / uResolution, vec2(0.0), vec2(1.0));
   vec4 field = texture(uField, uv);
   vec4 aux = texture(uAux, uv);
@@ -245,14 +241,43 @@ vec4 glyphAt(vec2 px) {
   float present = step(pick, uDensity * mix(1.0, 0.3 + tone * 1.1, 0.55));
   float cutoff = smoothstep(0.03, 0.1, value);
   float focus = step(hash12(cell * 0.71 + 9.2 + uSeedValue), uDepth);
-  float coverage = sampleGlyph(index, local, coord, focus * 1.2);
-  float alpha = uOpacity * present * cutoff * coverage * mix(1.0, 0.35 + 0.65 * level, 0.55) * (1.0 - focus * 0.5);
+  float alpha = uOpacity * present * cutoff * mix(1.0, 0.35 + 0.65 * level, 0.55) * (1.0 - focus * 0.5);
   if (uLight < 0.5) {
     vec3 light = field.rgb * 0.55 + vec3(0.03) * field.a;
-    return vec4(light * alpha, 0.6 * field.a * alpha);
+    outColor = vec4(light * alpha, 0.6 * field.a * alpha);
+  } else {
+    outColor = vec4(visible * 0.8 * alpha, alpha);
   }
-  vec3 ink = visible * 0.8;
-  return vec4(ink * alpha, alpha);
+  outGlyph = vec4(index / 255.0, focus, 0.0, 1.0);
+}`
+
+const GLYPHS = `
+uniform sampler2D uCells;
+uniform sampler2D uCellGlyph;
+uniform sampler2D uAtlas;
+uniform vec2 uCell;
+uniform vec2 uOffset;
+uniform vec2 uAtlasGrid;
+${COMMON}
+float sampleGlyph(float index, vec2 local, vec2 dx, vec2 dy, float soft) {
+  float column = mod(index, uAtlasGrid.x);
+  float row = floor(index / uAtlasGrid.x);
+  vec2 atlasUv = vec2((column + local.x) / uAtlasGrid.x, (row + 1.0 - local.y) / uAtlasGrid.y);
+  float scale = exp2(soft);
+  return textureGrad(uAtlas, atlasUv, dx * scale, dy * scale).a;
+}
+
+vec4 glyphAt(vec2 px) {
+  vec2 coord = (px - uOffset) / uCell;
+  vec2 cell = floor(coord);
+  // производные считаются до ветвления: в пустой клетке атлас не нужен, и пиксель выходит сразу
+  vec2 continuous = coord / uAtlasGrid;
+  vec2 dx = dFdx(continuous), dy = dFdy(continuous);
+  ivec2 at = clamp(ivec2(cell), ivec2(0), textureSize(uCells, 0) - 1);
+  vec4 color = texelFetch(uCells, at, 0);
+  if (color == vec4(0.0)) return color;
+  vec4 glyph = texelFetch(uCellGlyph, at, 0);
+  return color * sampleGlyph(floor(glyph.r * 255.0 + 0.5), coord - cell, dx, dy, glyph.g * 1.2);
 }
 `
 
@@ -283,7 +308,9 @@ void main() {
 
 const COMPOSITE = `#version 300 es
 precision highp float;
+uniform sampler2D uField;
 uniform sampler2D uHalo;
+uniform float uLight;
 uniform float uGlow;
 uniform float uGradient;
 uniform float uGrain;
@@ -457,10 +484,10 @@ export function createGradientAscii(container, options = {}) {
   const gl = canvas.getContext('webgl2', { alpha: true, premultipliedAlpha: true, antialias: false, depth: false, stencil: false, powerPreference: 'low-power' })
   if (!gl) { canvas.remove(); return fail('WebGL2 недоступен') }
 
-  const field = link(gl, FIELD), halo = link(gl, HALO), blur = link(gl, BLUR), composite = link(gl, COMPOSITE)
-  if (!field || !halo || !blur || !composite) { canvas.remove(); return fail('шейдеры не собрались') }
+  const field = link(gl, FIELD), cells = link(gl, CELLS), halo = link(gl, HALO), blur = link(gl, BLUR), composite = link(gl, COMPOSITE)
+  if (!field || !cells || !halo || !blur || !composite) { canvas.remove(); return fail('шейдеры не собрались') }
   const vao = gl.createVertexArray()
-  const fieldTarget = createTarget(gl, 2), haloA = createTarget(gl, 1), haloB = createTarget(gl, 1)
+  const fieldTarget = createTarget(gl, 2), cellTarget = createTarget(gl, 2), haloA = createTarget(gl, 1), haloB = createTarget(gl, 1)
 
   const probe = document.createElement('canvas').getContext('2d', { willReadFrequently: true })
   const parse = value => {
@@ -513,18 +540,33 @@ export function createGradientAscii(container, options = {}) {
     list.forEach((color, i) => ramp.set(toLab(parse(color)), i * 3))
   }
 
-  function bindGlyphs(program, width, height) {
-    if (!atlas) return
+  // сетка клеток по холсту: размер клетки, сколько их, сдвиг, чтобы сетка стояла по центру
+  function grid() {
+    const height = clamp(s.cellSize, 6, 64) * view.ratio
+    const width = height * (ATLAS_CELL_W / ATLAS_CELL_H)
+    const columns = Math.ceil(canvas.width / width), rows = Math.ceil(canvas.height / height)
+    return { width, height, columns, rows, x: (canvas.width - columns * width) / 2, y: (canvas.height - rows * height) / 2 }
+  }
+
+  // пиксельные проходы: клетка плюс форма символа из атласа
+  function bindGlyphs(program, g) {
     const u = program.uniforms
-    const cellH = clamp(s.cellSize, 6, 64) * view.ratio
-    const cellW = cellH * (ATLAS_CELL_W / ATLAS_CELL_H)
+    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, cellTarget.textures[0]); gl.uniform1i(u.uCells, 0)
+    gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, cellTarget.textures[1]); gl.uniform1i(u.uCellGlyph, 1)
+    gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, atlas.texture); gl.uniform1i(u.uAtlas, 2)
+    gl.uniform2f(u.uCell, g.width, g.height)
+    gl.uniform2f(u.uOffset, g.x, g.y)
+    gl.uniform2f(u.uAtlasGrid, atlas.grid[0], atlas.grid[1])
+  }
+
+  // проход клеток: что за символ в каждой клетке и какого он цвета
+  function bindCells(g) {
+    const u = cells.uniforms
     gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, fieldTarget.textures[0]); gl.uniform1i(u.uField, 0)
     gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, fieldTarget.textures[1]); gl.uniform1i(u.uAux, 1)
-    gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, atlas.texture); gl.uniform1i(u.uAtlas, 2)
-    gl.uniform2f(u.uResolution, width, height)
-    gl.uniform2f(u.uCell, cellW, cellH)
-    gl.uniform2f(u.uOffset, (width - Math.ceil(width / cellW) * cellW) / 2, (height - Math.ceil(height / cellH) * cellH) / 2)
-    gl.uniform2f(u.uAtlasGrid, atlas.grid[0], atlas.grid[1])
+    gl.uniform2f(u.uResolution, canvas.width, canvas.height)
+    gl.uniform2f(u.uCell, g.width, g.height)
+    gl.uniform2f(u.uOffset, g.x, g.y)
     gl.uniform1f(u.uCount, atlas.count)
     gl.uniform1f(u.uDensity, clamp(s.density, 0, 1))
     gl.uniform1f(u.uOpacity, clamp(s.glyphOpacity, 0, 1))
@@ -566,13 +608,22 @@ export function createGradientAscii(container, options = {}) {
     if (fu.uLift) gl.uniform1f(fu.uLift, s.lift)
     gl.drawArrays(gl.TRIANGLES, 0, 3)
 
+    const g = grid()
+    sizeTarget(gl, cellTarget, g.columns, g.rows)
+    gl.bindFramebuffer(gl.FRAMEBUFFER, cellTarget.framebuffer)
+    gl.drawBuffers([gl.COLOR_ATTACHMENT0, gl.COLOR_ATTACHMENT1])
+    gl.viewport(0, 0, g.columns, g.rows)
+    gl.useProgram(cells.program)
+    bindCells(g)
+    gl.drawArrays(gl.TRIANGLES, 0, 3)
+
     const glowing = s.glow > 0.001 && !lite()
     if (glowing) {
       gl.bindFramebuffer(gl.FRAMEBUFFER, haloA.framebuffer)
       gl.drawBuffers([gl.COLOR_ATTACHMENT0])
       gl.viewport(0, 0, haloA.width, haloA.height)
       gl.useProgram(halo.program)
-      bindGlyphs(halo, canvas.width, canvas.height)
+      bindGlyphs(halo, g)
       gl.uniform1f(halo.uniforms.uDownscale, canvas.width / haloA.width)
       gl.drawArrays(gl.TRIANGLES, 0, 3)
 
@@ -592,11 +643,15 @@ export function createGradientAscii(container, options = {}) {
     gl.bindFramebuffer(gl.FRAMEBUFFER, null)
     gl.viewport(0, 0, canvas.width, canvas.height)
     gl.useProgram(composite.program)
-    bindGlyphs(composite, canvas.width, canvas.height)
+    bindGlyphs(composite, g)
     const cu = composite.uniforms
     gl.activeTexture(gl.TEXTURE3)
     gl.bindTexture(gl.TEXTURE_2D, haloA.textures[0])
     gl.uniform1i(cu.uHalo, 3)
+    gl.activeTexture(gl.TEXTURE4)
+    gl.bindTexture(gl.TEXTURE_2D, fieldTarget.textures[0])
+    gl.uniform1i(cu.uField, 4)
+    gl.uniform1f(cu.uLight, s.lightMode ? 1 : 0)
     gl.uniform1f(cu.uGlow, glowing ? clamp(s.glow, 0, 2) : 0)
     gl.uniform1f(cu.uGradient, clamp(s.gradientOpacity, 0, 1))
     gl.uniform1f(cu.uGrain, clamp(s.grain, 0, 0.4))
@@ -616,7 +671,7 @@ export function createGradientAscii(container, options = {}) {
     view.ratio = Math.min(window.devicePixelRatio || 1, lite() ? 1 : s.maxDpr)
     canvas.width = Math.max(1, Math.round(view.width * view.ratio))
     canvas.height = Math.max(1, Math.round(view.height * view.ratio))
-    sizeTarget(gl, fieldTarget, Math.max(1, Math.round(canvas.width / 2)), Math.max(1, Math.round(canvas.height / 2)))
+    sizeTarget(gl, fieldTarget, Math.max(1, Math.round(canvas.width / 4)), Math.max(1, Math.round(canvas.height / 4)))
     const hw = Math.max(1, Math.round(canvas.width / 4)), hh = Math.max(1, Math.round(canvas.height / 4))
     sizeTarget(gl, haloA, hw, hh)
     sizeTarget(gl, haloB, hw, hh)
@@ -647,8 +702,10 @@ export function createGradientAscii(container, options = {}) {
   function frame(now) {
     raf = 0
     if (disposed || !visible || document.hidden) return
-    // на слабом компьютере 30 кадров в секунду хватает: свет движется медленно
-    if (lite() && drawnAt && now - drawnAt < 1000 / 30 - 2) { raf = requestAnimationFrame(frame); return }
+    // свет движется медленно, и 30 кадров в секунду ему хватает даже на мониторе в 144 Гц. Пока под курсором
+    // перемешиваются символы или идёт волна от клика, кадров столько, сколько даёт экран, на слабом компьютере всегда 30
+    const stirred = clicks.length > 0 || trail.length > 0
+    if ((lite() || !stirred) && drawnAt && now - drawnAt < 1000 / 30 - 2) { raf = requestAnimationFrame(frame); return }
     drawnAt = now
     const dt = last ? clamp((now - last) / 1000, 0.001, 0.05) : 1 / 60
     last = now
@@ -737,13 +794,13 @@ export function createGradientAscii(container, options = {}) {
     document.removeEventListener('visibilitychange', onVisibility)
     removeEventListener('simple:lite', onTier)
     removeEventListener('simple:tier', onTier)
-    ;[fieldTarget, haloA, haloB].forEach(target => {
+    ;[fieldTarget, cellTarget, haloA, haloB].forEach(target => {
       target.textures.forEach(texture => gl.deleteTexture(texture))
       gl.deleteFramebuffer(target.framebuffer)
     })
     if (atlas) gl.deleteTexture(atlas.texture)
     gl.deleteVertexArray(vao)
-    ;[field, halo, blur, composite].forEach(item => gl.deleteProgram(item.program))
+    ;[field, cells, halo, blur, composite].forEach(item => gl.deleteProgram(item.program))
     gl.getExtension('WEBGL_lose_context')?.loseContext()
     canvas.remove()
   }

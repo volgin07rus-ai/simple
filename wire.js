@@ -20,12 +20,15 @@
   // идёт голова, и браузер перерисовывает узкую полосу вокруг него. Одним путём на всю трассу провод занимал
   // почти всю страницу, и каждый кадр прокрутки перерисовывался весь экран под ним: на слабых ноутбуках это рывки
   const track = make('path', 'wire-track'), lit = make('g', 'wire-lit-g')
-  const pulse = make('circle', 'wire-pulse'), head = make('circle', 'wire-head')
-  pulse.setAttribute('r', 2.4)
-  head.setAttribute('r', 3.4)
-  svg.append(track, lit, pulse, head)
+  svg.append(track, lit)
+  // Голова провода и импульс не кружки внутри SVG, а отдельные точки поверх него: они едут сдвигом в своём слое.
+  // Кружок внутри SVG при каждом шаге заставлял перерисовывать весь холст провода высотой со страницу,
+  // а импульс бежит каждые 3,6 секунды
+  const dot = cls => { const el = document.createElement('i'); el.className = cls; el.setAttribute('aria-hidden', 'true'); return el }
+  const pulse = dot('wire-pulse'), head = dot('wire-head')
+  const place = (el, pt) => { el.style.transform = `translate(${pt.x}px,${pt.y}px)` }
   let legs = []   // { el, start, len, mode }
-  main.prepend(svg)
+  main.prepend(svg, pulse, head)
 
   // Координаты внутри main по раскладке, без transform: блоки до появления ещё сдвинуты
   const box = el => {
@@ -170,10 +173,7 @@
     if (shown !== sent) {
       sent = shown
       const pt = pointAt(shown)
-      if (live) {
-        head.setAttribute('cx', pt.x)
-        head.setAttribute('cy', pt.y)
-      }
+      if (live) place(head, pt)
       // где сейчас голова провода на странице: по ней на телефоне загораются шаги «Что происходит с вашей задачей»
       document.dispatchEvent(new CustomEvent('wirehead', { detail: top + pt.y }))
     }
@@ -190,8 +190,7 @@
       else {
         const from = Math.max(0, shown - 560)
         const pt = pointAt(from + (shown - from) * ease(t))
-        pulse.setAttribute('cx', pt.x)
-        pulse.setAttribute('cy', pt.y)
+        place(pulse, pt)
         pulse.style.opacity = Math.min(1, t / 0.15, (1 - t) / 0.25)
         on = true
       }

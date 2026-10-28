@@ -1400,9 +1400,11 @@ main{ position:relative }
 .wire{ position:absolute; left:0; top:0; pointer-events:none; overflow:visible }
 .wire-track{ fill:none; stroke:rgba(255,255,255,.13); stroke-width:1.1; stroke-dasharray:3 5 }
 .wire-lit{ fill:none; stroke:var(--lime); stroke-width:1.5 }
-.wire-head{ fill:var(--lime); opacity:0; transition:opacity .4s var(--ease-quart) }
+/* голова и импульс: точки в своём слое, двигаются сдвигом, провод под ними не перерисовывается */
+.wire-head,.wire-pulse{ position:absolute; left:0; top:0; border-radius:50%; pointer-events:none; opacity:0; will-change:transform, opacity }
+.wire-head{ width:6.8px; height:6.8px; margin:-3.4px 0 0 -3.4px; background:var(--lime); transition:opacity .4s var(--ease-quart) }
 .wire-head.is-on{ opacity:1 }
-.wire-pulse{ fill:#F4FFC4; opacity:0 }
+.wire-pulse{ width:4.8px; height:4.8px; margin:-2.4px 0 0 -2.4px; background:#F4FFC4 }
 /* порты: у карточки Simple снизу и у кассы слева, загораются, когда провод до них дошёл */
 .hub::after,.receipt-printer::before{
   content:""; position:absolute; width:.5rem; height:.5rem; border-radius:50%;
