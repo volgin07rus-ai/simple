@@ -62,13 +62,24 @@
   // На быстром компьютере опаздывает не больше 2% кадров, и то во время загрузки
   // Обычный кадр дольше 24 мс (меньше 40 кадров в секунду) — облегчённый. Вниз уровень сам не возвращается.
   // Посмотреть режим вручную: адрес с ?quality=full, ?quality=lite или ?quality=calm (держится до конца визита),
-  // ?quality=auto снова включает автоматический выбор
+  // ?quality=auto снова включает автоматический выбор. Адрес с ?debug показывает внизу экрана, какой режим
+  // выбран и почему: так можно проверить сайт там, где нет инструментов разработчика, например в Instagram
+  //
+  // Встроенные браузеры соцсетей (Instagram, Facebook, VK, TikTok): страница открывается в окне поверх ленты,
+  // и первые секунды приложение само занимает телефон, пока выезжает окно и грузится его панель. Замер видел
+  // в это время рывки, которых у сайта нет, и за пару замеров уводил в спокойный режим, где фон стоит, а уровень
+  // запоминался на три дня. Поэтому там замеры начинаются только после первой прокрутки, выше облегчённого режима
+  // замеры не поднимают, и уровень держится только до конца визита
   const root = document.documentElement
   const KEY = 'simple-quality', LEVELS = { full: 0, lite: 1, calm: 2 }
+  const inApp = /Instagram|FBAN|FBAV|FB_IAB|FBIOS|VKClient|TikTok|musical_ly|BytedanceWebview|Line\//i.test(navigator.userAgent)
+  const CEILING = inApp ? 1 : 2
   // хранилища браузера могут быть недоступны (приватный режим, запрет сайта): тогда просто не запоминаем
   const store = (s, k, v) => { try { v === undefined ? window[s].removeItem(k) : window[s].setItem(k, v) } catch {} }
   const read = (s, k) => { try { return window[s].getItem(k) } catch { return null } }
   let tier = 0, pinned = false
+  const why = []   // почему выбран такой уровень: показывает ?debug
+  const note = text => { why.push(text); dispatchEvent(new Event('simple:why')) }
 
   function apply(t) {
     const was = tier
@@ -78,37 +89,42 @@
     if (was < 1 && tier >= 1) dispatchEvent(new Event('simple:lite'))
     dispatchEvent(new CustomEvent('simple:tier', { detail: tier }))
   }
-  // уровень по замеру: запоминаем на визит и на три дня для этого компьютера
+  // уровень по замеру: запоминаем на визит, а вне встроенных браузеров ещё и на три дня для этого компьютера
   function raise(t) {
-    t = Math.min(2, t)
+    t = Math.min(CEILING, t)
     if (pinned || t <= tier) return false
     apply(t)
     store('sessionStorage', KEY, String(tier))
-    store('localStorage', KEY, JSON.stringify({ tier, at: Date.now() }))
+    if (!inApp) store('localStorage', KEY, JSON.stringify({ tier, at: Date.now() }))
     return true
   }
 
   // Видеокарта по имени. Safari имя не называет, там решают замеры
+  const gpu = { name: '', caveat: false, webgl2: false }
+  function rendererOf(gl) {
+    let name = gl.getParameter(gl.RENDERER) || ''
+    if (/^(WebKit WebGL|Mozilla)$/i.test(name)) {
+      const ext = gl.getExtension('WEBGL_debug_renderer_info')
+      if (ext) name = gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) || name
+    }
+    return name
+  }
   function gpuHint() {
     try {
       const canvas = document.createElement('canvas')
-      if (canvas.getContext('webgl', { failIfMajorPerformanceCaveat: true })) {
-        const gl = canvas.getContext('webgl')
-        let name = gl.getParameter(gl.RENDERER) || ''
-        if (/^(WebKit WebGL|Mozilla)$/i.test(name)) {
-          const ext = gl.getExtension('WEBGL_debug_renderer_info')
-          if (ext) name = gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) || name
-        }
-        gl.getExtension('WEBGL_lose_context')?.loseContext()
-        const pixels = innerWidth * innerHeight * devicePixelRatio ** 2
-        // встроенная Intel до Iris Xe (HD, UHD, Iris Plus и Pro, как в MacBook 2015–2020), слабые мобильные и старые AMD
-        const weak = /Intel.*(HD Graphics|UHD Graphics|Iris(\((TM|R)\))? (Plus|Pro|Graphics \d))|Mali-(T\d+|G[1-5]\d)\b|Adreno\D*[1-5]\d\d\b|PowerVR|Radeon R[2-7]\b/i.test(name)
-        return weak && pixels > 2.2e6 ? 1 : 0
-      }
-      // WebGL есть, но только без видеокарты, программно: такой компьютер не потянет даже облегчённый режим
-      const soft = canvas.getContext('webgl')
-      soft?.getExtension('WEBGL_lose_context')?.loseContext()
-      return soft ? 2 : 0
+      gpu.caveat = !canvas.getContext('webgl', { failIfMajorPerformanceCaveat: true })
+      const gl = canvas.getContext('webgl')
+      if (!gl) return 0
+      gpu.name = rendererOf(gl)
+      gl.getExtension('WEBGL_lose_context')?.loseContext()
+      // Браузер предупреждает, что WebGL медленный. Если рисует программа без видеокарты (SwiftShader, llvmpipe)
+      // или имя скрыто, такой компьютер не потянет даже облегчённый режим. Но встроенные браузеры приложений
+      // на Android предупреждают и при настоящей видеокарте: тогда решает имя, как обычно
+      if (gpu.caveat && (/SwiftShader|llvmpipe|softpipe|Software|Basic Render/i.test(gpu.name) || /^(WebKit WebGL|Mozilla|)$/i.test(gpu.name))) return 2
+      const pixels = innerWidth * innerHeight * devicePixelRatio ** 2
+      // встроенная Intel до Iris Xe (HD, UHD, Iris Plus и Pro, как в MacBook 2015–2020), слабые мобильные и старые AMD
+      const weak = /Intel.*(HD Graphics|UHD Graphics|Iris(\((TM|R)\))? (Plus|Pro|Graphics \d))|Mali-(T\d+|G[1-5]\d)\b|Adreno\D*[1-5]\d\d\b|PowerVR|Radeon R[2-7]\b/i.test(gpu.name)
+      return weak && pixels > 2.2e6 ? 1 : 0
     } catch { return 0 }
   }
 
@@ -116,21 +132,27 @@
   if (asked === 'auto') { store('sessionStorage', KEY + '-pin'); store('sessionStorage', KEY); store('localStorage', KEY) }
   else if (asked in LEVELS) store('sessionStorage', KEY + '-pin', String(LEVELS[asked]))
   const pin = read('sessionStorage', KEY + '-pin')
-  if (pin !== null) { pinned = true; if (+pin) apply(+pin) }
+  if (pin !== null) { pinned = true; note('задан вручную: ' + ['full', 'lite', 'calm'][+pin]); if (+pin) apply(+pin) }
   else {
     let start = +read('sessionStorage', KEY) || 0
-    try {
+    if (start) note('уже выбран в этом визите: ' + start)
+    // во встроенных браузерах уровень с прошлых визитов не берём: его мог выбрать неудачный замер
+    if (!inApp) try {
       const saved = JSON.parse(read('localStorage', KEY) || 'null')
-      if (saved && Date.now() - saved.at < 3 * 864e5) start = Math.max(start, saved.tier)
+      if (saved && Date.now() - saved.at < 3 * 864e5 && saved.tier > start) { start = saved.tier; note('запомнен с прошлого визита: ' + start) }
     } catch {}
-    if (navigator.connection && navigator.connection.saveData) start = Math.max(start, 1)
-    if (start < 2) start = Math.max(start, gpuHint())
+    if (navigator.connection && navigator.connection.saveData) { start = Math.max(start, 1); note('браузер просит экономить трафик') }
+    if (start < 2) {
+      const hint = gpuHint()
+      if (hint) note('видеокарта: ' + (hint === 2 ? 'рисует без видеокарты' : 'слабая на таком экране'))
+      start = Math.max(start, hint)
+    }
     if (start) apply(Math.min(2, start))
   }
 
-  let sampling = false, lastSample = -1e9, samples = 0
+  let sampling = false, lastSample = -1e9, samples = 0, moved = !inApp
   function sample(ms = 2500, again = false) {
-    if (pinned || tier >= 2 || sampling || document.hidden || samples >= 12) return
+    if (pinned || tier >= CEILING || sampling || document.hidden || samples >= 12 || !moved) return
     if (!again && performance.now() - lastSample < 4000) return
     sampling = true
     const gaps = []
@@ -150,6 +172,7 @@
       const late = gaps.filter(g => g > Math.max(25, base * 1.5)).length / gaps.length
       dispatchEvent(new CustomEvent('simple:frames', { detail: { late, median, base, n: gaps.length } }))   // для проверок
       const raised = late > 0.06 ? raise(tier + 1) : median > 24 && tier < 1 ? raise(1) : false
+      note(`замер: кадр ${median.toFixed(0)} мс, опоздало ${(late * 100).toFixed(0)}%${raised ? ' → ' + ['full', 'lite', 'calm'][tier] : ''}`)
       // после перехода меряем ещё раз: вдруг и этого мало
       if (raised && tier < 2) setTimeout(() => sample(2500, true), 1500)
     }
@@ -174,8 +197,37 @@
   else addEventListener('load', revealed, { once: true })
   addEventListener('scroll', function first() {
     removeEventListener('scroll', first)
+    moved = true
     setTimeout(() => sample(3000), 200)
   }, { passive: true })
+
+  /* ---------- ?debug: какой режим выбран и почему ---------- */
+  if (new URLSearchParams(location.search).has('debug')) {
+    const panel = document.createElement('pre')
+    panel.style.cssText = 'position:fixed;left:8px;right:8px;bottom:8px;z-index:2147483647;margin:0;padding:10px 12px;' +
+      'max-height:45vh;overflow:auto;border-radius:10px;background:rgba(0,0,0,.86);color:#D8FF32;' +
+      'font:12px/1.45 ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;pointer-events:auto'
+    panel.title = 'нажмите, чтобы скрыть'
+    panel.addEventListener('click', () => panel.remove())
+    let webgl2 = false
+    try { const gl = document.createElement('canvas').getContext('webgl2'); webgl2 = !!gl; gl?.getExtension('WEBGL_lose_context')?.loseContext() } catch {}
+    if (!gpu.name) try { const gl = document.createElement('canvas').getContext('webgl'); if (gl) { gpu.name = rendererOf(gl); gl.getExtension('WEBGL_lose_context')?.loseContext() } } catch {}
+    const show = () => {
+      panel.textContent = [
+        'режим: ' + ['full', 'lite', 'calm'][tier] + (pinned ? ' (вручную)' : ''),
+        'браузер: ' + (inApp ? 'встроенный в приложение' : 'обычный') + ', ' + (navigator.userAgent.match(/Instagram[\d. ]*|FBAV\/[\d.]+|VKClient|TikTok|CriOS|FxiOS|EdgiOS|Edg\/|YaBrowser|Chrome\/\d+|Version\/[\d.]+ (Mobile\/\S+ )?Safari/) || ['?'])[0],
+        'видеокарта: ' + (gpu.name || 'не названа') + (gpu.caveat ? ', браузер считает WebGL медленным' : '') + ', WebGL2 ' + (webgl2 ? 'есть' : 'нет'),
+        'фон: ' + (root.dataset.bg || 'ещё грузится') + ', экран ' + innerWidth + '×' + innerHeight + ' x' + devicePixelRatio +
+          (matchMedia('(prefers-reduced-motion: reduce)').matches ? ', просит меньше движения' : ''),
+        ...why
+      ].join('\n')
+    }
+    addEventListener('simple:why', show)
+    addEventListener('simple:tier', show)
+    addEventListener('simple:bg-ready', show)
+    const mount = () => { document.body.appendChild(panel); show() }
+    document.body ? mount() : addEventListener('DOMContentLoaded', mount)
+  }
 
   /* ---------- Анимации по кругу за пределами экрана стоят ---------- */
   // Мигающие точки, огоньки по линиям схем, «печатает…» в чате: браузер крутит такие анимации всё время,
