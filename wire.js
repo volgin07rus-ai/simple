@@ -44,7 +44,7 @@
     const left = Math.max(a.r, c.r), right = Math.min(b.l, d.l)
     const channel = right - left > 48 ? (left + right) / 2 : gutter
     const h = box(hub), p = box(printer)
-    const fitTop = box(q('#fit')).t, worksTop = box(q('#works')).t
+    const fitTop = box(q('#fit')).t, worksTop = box(q('#services')).b
     // К кассе провод подходит слева и заходит в порт на её боку. На телефоне касса стоит почти вплотную
     // к коридору, поворот к порту прятался за её корпусом, и видимая линия обрывалась выше порта.
     // Если места на поворот нет, провод спускается прямо в порт, а порт встаёт точно под провод

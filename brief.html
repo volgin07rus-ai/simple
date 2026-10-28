@@ -22,6 +22,10 @@
   <meta name="twitter:card" content="summary_large_image" />
   <link rel="preload" href="assets/fonts/onest-cyrillic.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="assets/fonts/onest-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <!-- фон первого экрана: поле фигур (bg.js подключает shape-waves.js, тот vendor/vgpu.js); так все три качаются сразу -->
+  <link rel="modulepreload" href="bg.js" />
+  <link rel="modulepreload" href="shape-waves.js" />
+  <link rel="modulepreload" href="vendor/vgpu.js" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body class="page-brief">
@@ -35,6 +39,7 @@
     <nav class="nav" aria-label="Разделы">
       <a href="index.html#how">Как работаем</a>
       <a href="index.html#services">Что делаем</a>
+      <a href="index.html#cases">Кейсы</a>
       <a href="works.html">Работы</a>
       <a href="index.html#pricing">Цена</a>
       <a href="index.html#faq">Вопросы</a>
@@ -48,9 +53,10 @@
   </header>
 
   <main id="main">
-    <!-- Первый экран брифа: за заголовком фон «FaultyTerminal» (terminal.js), поле лаймовых символов, как на старом терминале -->
-    <section class="bt-hero" data-reveal data-bg-late>
-      <div class="bt-term" data-terminal aria-hidden="true"></div>
+    <!-- Первый экран брифа: за заголовком поле фигур (bg.js, shape-waves.js), с 28 октября; раньше было поле символов
+         FaultyTerminal (terminal.js, файл оставлен). Сверху поле уходит под меню, снизу растворяется в странице -->
+    <section class="bt-hero" data-reveal data-bg-late data-hero-bg="waves">
+      <div class="hero-bg bt-bg" aria-hidden="true"><div class="waves" id="waves"></div></div>
       <div class="wrap bt-hero-in">
         <p class="bt-eyebrow rv" style="--d:0ms">Бриф на проект</p>
         <h1 class="h1 bt-h1">
@@ -229,6 +235,7 @@
         <nav class="ftr-nav" aria-label="Разделы внизу страницы">
           <a href="index.html#how">Как работаем</a>
           <a href="index.html#services">Что делаем</a>
+          <a href="index.html#cases">Кейсы</a>
           <a href="works.html">Работы</a>
           <a href="index.html#pricing">Цена</a>
           <a href="index.html#faq">Вопросы</a>
@@ -252,6 +259,6 @@
   <script src="blocks.js"></script>
   <script src="brief-data.js"></script>
   <script src="brief.js"></script>
-  <script src="terminal.js"></script>
+  <script type="module" src="bg.js"></script>
 </body>
 </html>

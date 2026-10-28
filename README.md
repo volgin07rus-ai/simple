@@ -57,5 +57,7 @@ npx http-server . -p 5195
 ## Сторонний код
 
 Фоны и эффекты перенесены из [React Bits](https://reactbits.dev) без React (MIT + Commons Clause):
-PixelBlast, FaultyTerminal, ShapeWaves, DriftWall, TechText, StaggeredMenu.
+PixelBlast, FaultyTerminal, ShapeWaves, DriftWall, TechText, StaggeredMenu, GradientASCII.
+
+Фон первого экрана выбирает атрибут `data-hero-bg` у первого экрана (`bg.js`): `ascii` свет из символов (`gradient-ascii.js`, с 28.10.2026 проба на главной), `waves` поле фигур (`shape-waves.js`, на брифе). Сравнить без правки файлов: `?bg=waves` или `?bg=ascii` в адресе. Вернуть главной поле фигур: `data-hero-bg="waves"` в index.html и подсказки modulepreload как на брифе. `terminal.js` (FaultyTerminal, прежний фон брифа) сейчас не подключён.
 Библиотека `vendor/vgpu.js` из [vercel-labs/vgpu](https://github.com/vercel-labs/vgpu), лицензия MIT.

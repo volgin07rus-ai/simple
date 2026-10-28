@@ -24,11 +24,11 @@
   <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebSite","@id":"https://simplemind.ru/#website","url":"https://simplemind.ru/","name":"Simple Mind","alternateName":["SimpleMind","Simple","Симпл Майнд"],"inLanguage":"ru-RU","publisher":{"@id":"https://simplemind.ru/#organization"}},{"@type":"Organization","@id":"https://simplemind.ru/#organization","name":"Simple Mind","alternateName":["SimpleMind","Simple","Симпл Майнд"],"url":"https://simplemind.ru/","logo":"https://simplemind.ru/assets/logo-512.png","image":"https://simplemind.ru/assets/og.png","description":"Автоматизация процессов бизнеса: заявки, счета, документы и ответы клиентам. Сайты, боты, интеграции и AI","email":"info@simplemind.ru","telephone":"+7-925-555-82-90","sameAs":["https://t.me/simple_ai_team"],"areaServed":{"@type":"Country","name":"Россия"},"knowsAbout":["автоматизация бизнеса","автоматизация бизнес-процессов","автоматизация документооборота","интеграция CRM и 1С","разработка чат-ботов","Telegram-боты","AI-ассистенты","AI-телефония","разработка сайтов"],"hasOfferCatalog":{"@type":"OfferCatalog","name":"Что делаем","itemListElement":[{"@type":"Offer","itemOffered":{"@type":"Service","name":"Сайты","description":"Лендинги, корпоративные сайты и цифровая упаковка. Собираем сайт так, чтобы с него приходили заявки","provider":{"@id":"https://simplemind.ru/#organization"},"areaServed":{"@type":"Country","name":"Россия"}}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"Автоматизация рутины","description":"Счета и КП по шаблонам компании, мониторинг тендеров, разбор входящей почты. Данные, статусы и отчёты собираются сами","provider":{"@id":"https://simplemind.ru/#organization"},"areaServed":{"@type":"Country","name":"Россия"}}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"Документооборот","description":"Согласования и статусы документов в одном месте. Декларации заполняются сами и проходят проверку перед подачей. AI отмечает важное в договорах","provider":{"@id":"https://simplemind.ru/#organization"},"areaServed":{"@type":"Country","name":"Россия"}}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"Интеграции и своё ПО","description":"Связываем CRM, учёт, склад и системы поставщиков. Делаем программы под ваши процессы, в том числе по образцу решения, которое вам нравится","provider":{"@id":"https://simplemind.ru/#organization"},"areaServed":{"@type":"Country","name":"Россия"}}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"Боты и мини-аппы","description":"Боты отвечают клиентам на типовые вопросы и передают сложные случаи менеджеру. Внутренние боты забирают у команды рутину","provider":{"@id":"https://simplemind.ru/#organization"},"areaServed":{"@type":"Country","name":"Россия"}}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"AI-телефония","description":"Расшифровка разговоров, сценарии для типовых обращений, итоги звонков сразу в CRM","provider":{"@id":"https://simplemind.ru/#organization"},"areaServed":{"@type":"Country","name":"Россия"}}}]}},{"@type":"FAQPage","@id":"https://simplemind.ru/#faq","mainEntity":[{"@type":"Question","name":"Как считается цена?","acceptedAnswer":{"@type":"Answer","text":"Смотрим на объём и сложность: что нужно сделать, с какими системами связать, что уже есть. Цену и срок называем до начала работы и фиксируем"}},{"@type":"Question","name":"Можно прислать несколько задач сразу?","acceptedAnswer":{"@type":"Answer","text":"Да. Оценим каждую отдельно и подскажем, с какой начать, чтобы эффект был быстрее"}},{"@type":"Question","name":"Что если задача поменяется по ходу?","acceptedAnswer":{"@type":"Answer","text":"Пересчитаем цену и срок и согласуем их с вами, прежде чем продолжать. Без вашего согласия цена не меняется"}},{"@type":"Question","name":"Серверы и лицензии оплачиваются отдельно?","acceptedAnswer":{"@type":"Answer","text":"Если для задачи нужны серверы, платные сервисы или лицензии, называем их стоимость вместе с оценкой. Неожиданных платежей в конце не будет"}},{"@type":"Question","name":"Как оформляется работа?","acceptedAnswer":{"@type":"Answer","text":"По договору: в нём фиксируем результат, цену и срок. Большую задачу можно разбить на этапы и оплачивать каждый отдельно"}},{"@type":"Question","name":"Что после запуска?","acceptedAnswer":{"@type":"Answer","text":"Процесс работает сам, круглосуточно и без выходных. Новые задачи присылайте, когда появятся: оценим их так же"}},{"@type":"Question","name":"Кому принадлежит код?","acceptedAnswer":{"@type":"Answer","text":"Код остаётся у Simple, а данные, которые в нём хранятся, ваши. Если вам нужен сам код, обсудим это вместе с оценкой"}},{"@type":"Question","name":"Как вы защищаете данные?","acceptedAnswer":{"@type":"Answer","text":"Для чувствительных процессов делаем приложения без доступа в интернет и ставим локальные версии AI. Данные не уходят во внешние сервисы"}}]}]}</script>
   <link rel="preload" href="assets/fonts/onest-cyrillic.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="assets/fonts/onest-latin.woff2" as="font" type="font/woff2" crossorigin />
-  <!-- фон первого экрана — модуль, который подключает ещё два файла. Без подсказки браузер узнаёт о них по цепочке,
-       только скачав предыдущий; так все три качаются сразу, вместе со стилями, и экран загрузки уходит раньше -->
+  <!-- фон первого экрана: bg.js подключает модуль фона. Без подсказки браузер узнаёт о нём по цепочке, только скачав
+       bg.js; так оба качаются сразу, вместе со стилями. Если вернуть главной поле фигур (data-hero-bg="waves"),
+       здесь нужны bg.js, shape-waves.js и vendor/vgpu.js, как на брифе -->
   <link rel="modulepreload" href="bg.js" />
-  <link rel="modulepreload" href="shape-waves.js" />
-  <link rel="modulepreload" href="vendor/vgpu.js" />
+  <link rel="modulepreload" href="gradient-ascii.js" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -42,6 +42,7 @@
     <nav class="nav" aria-label="Разделы">
       <a href="#how">Как работаем</a>
       <a href="#services">Что делаем</a>
+      <a href="#cases">Кейсы</a>
       <a href="#works">Работы</a>
       <a href="#pricing">Цена</a>
       <a href="#faq">Вопросы</a>
@@ -53,7 +54,7 @@
   </header>
 
   <main id="main">
-    <section class="hero" id="top" data-bg-late>
+    <section class="hero" id="top" data-bg-late data-hero-bg="ascii">
       <div class="hero-bg" aria-hidden="true">
         <div class="waves" id="waves"></div>
       </div>
@@ -333,6 +334,230 @@
             <div class="svc-stage" id="svc-stage"></div>
           </div>
         </div>
+      </div>
+    </section>
+
+    <!-- 4а. Кейсы: что уже работает у клиентов. Здесь часть проектов, об этом говорит последняя плитка.
+         Компании не называем, кроме площадки Соя ДВ: это открытый сайт, ссылку на него дать попросили.
+         У каждой карточки своя сцена, то, что система выдаёт: сайт, таблица, стопка документов, правка в Word,
+         XML накладной, сводка. Сцены оживают, когда карточка доезжает до экрана (blocks.js).
+         Сетка 12 колонок: площадка во всю ширину, дальше 7/5 и 5/7, ТРАНС-Менеджер снова во всю ширину, внизу полоса -->
+    <section class="sec cases" id="cases" data-reveal>
+      <div class="wrap">
+        <div class="sec-head">
+          <h2 class="h2">
+            <span class="ln"><span style="--d:0ms">Что уже работает</span></span>
+            <span class="ln"><span style="--d:110ms" class="accent">у клиентов</span></span>
+          </h2>
+          <p class="sec-note rv" style="--d:260ms">
+            Показываем часть проектов, не все. По каждому отрасль, задача и что сделали
+          </p>
+        </div>
+        <ol class="cases-grid">
+            <!-- 01. Сайт площадки: окно браузера, главная то на русском, то на китайском -->
+            <li class="case case-wide" data-reveal style="--d:0ms">
+              <div class="case-in">
+                <a class="case-scene sc-site" href="https://soyadv.com/" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+                  <span class="site-bar">
+                    <span class="site-dots"><i></i><i></i><i></i></span>
+                    <span class="site-url">soyadv.com</span>
+                    <span class="site-lang"><b>RU</b><b>中文</b></span>
+                  </span>
+                  <span class="site-shot">
+                    <img src="assets/cases/soy-ru.webp" alt="" width="1296" height="729" loading="lazy" decoding="async">
+                    <img src="assets/cases/soy-zh.webp" alt="" width="1296" height="729" loading="lazy" decoding="async">
+                  </span>
+                </a>
+                <div class="case-body">
+                  <p class="case-meta"><b>01</b>Торговля соей · Дальний Восток и Китай</p>
+                  <h3 class="case-title">Площадка для фермеров и покупателей из Китая</h3>
+                  <ul class="case-list">
+                    <li>Партии, заявки и переписка на готовых фразах на русском и китайском</li>
+                    <li>Реквизиты по ИНН одной кнопкой</li>
+                    <li>Мобильный чат для iPhone</li>
+                    <li>Фермерам без партий сами уходят письма-напоминания</li>
+                  </ul>
+                  <p class="case-status">
+                    <i aria-hidden="true"></i>Запущена, площадка открыта
+                    <a class="case-link" href="https://soyadv.com/" target="_blank" rel="noopener">soyadv.com<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+                  </p>
+                </div>
+              </div>
+            </li>
+
+            <!-- 02. CRM: таблица грузов, счета и УПД отмечаются сами -->
+            <li class="case" data-reveal data-scene style="--d:0ms;--done:2.4s">
+              <div class="case-in">
+                <div class="case-scene sc-crm" aria-hidden="true">
+                  <div class="crm-head"><span>Груз</span><span>Хранение</span><span>Счёт</span><span>УПД</span></div>
+                  <div class="crm-row" style="--r:0">
+                    <span class="crm-cargo"><b>Контейнер 40HC</b><small>Контейнерный отдел</small></span>
+                    <span class="crm-sum">4 800 ₽<small>6 дней</small></span>
+                    <i class="ok" style="--c:0"></i><i class="ok" style="--c:1"></i>
+                  </div>
+                  <div class="crm-row" style="--r:1">
+                    <span class="crm-cargo"><b>Авиа, 120 кг</b><small>Авиаотдел</small></span>
+                    <span class="crm-sum">900 ₽<small>2 дня</small></span>
+                    <i class="ok" style="--c:0"></i><i class="ok" style="--c:1"></i>
+                  </div>
+                  <div class="crm-row" style="--r:2">
+                    <span class="crm-cargo"><b>Вагон, 60 т</b><small>ЖД-отдел</small></span>
+                    <span class="crm-sum">13 200 ₽<small>11 дней</small></span>
+                    <i class="ok" style="--c:0"></i><i class="wait" style="--c:1"></i>
+                  </div>
+                </div>
+                <div class="case-body">
+                  <p class="case-meta"><b>02</b>Транспортная компания · Благовещенск</p>
+                  <h3 class="case-title">CRM для склада и офиса</h3>
+                  <ul class="case-list">
+                    <li>Грузы и хранение с расчётом стоимости</li>
+                    <li>Контейнерный, авиа- и ЖД-отделы со своими документами, счета и УПД как в 1С</li>
+                    <li>Счета из 1С загружаются сами, поручения экспедитору собираются по ним</li>
+                    <li>Зарплата водителей по формуле владельца</li>
+                  </ul>
+                  <p class="case-status"><i aria-hidden="true"></i>Работает, отделы ведут в ней всю работу</p>
+                </div>
+              </div>
+            </li>
+
+            <!-- 03. Экспорт: строка таблицы раскладывается в стопку документов -->
+            <li class="case" data-reveal data-scene style="--d:90ms;--done:1.8s">
+              <div class="case-in">
+                <div class="case-scene sc-docs" aria-hidden="true">
+                  <div class="sheet">
+                    <span class="sheet-name"><i></i>Отгрузки</span>
+                    <span class="sheet-grid">
+                      <span class="sheet-row"><i style="--w:70%"></i><i style="--w:50%"></i><i style="--w:80%"></i></span>
+                      <span class="sheet-row"><i style="--w:55%"></i><i style="--w:75%"></i><i style="--w:40%"></i></span>
+                      <span class="sheet-row is-pick"><i style="--w:80%"></i><i style="--w:60%"></i><i style="--w:70%"></i></span>
+                      <span class="sheet-row"><i style="--w:45%"></i><i style="--w:70%"></i><i style="--w:55%"></i></span>
+                      <span class="sheet-row"><i style="--w:65%"></i><i style="--w:40%"></i><i style="--w:75%"></i></span>
+                    </span>
+                  </div>
+                  <div class="papers">
+                    <span class="paper" style="--k:0"><b>Спецификация</b><i></i><i></i><i></i></span>
+                    <span class="paper" style="--k:1"><b>CMR</b><i></i><i></i><i></i></span>
+                    <span class="paper" style="--k:2"><b>Инвойс</b><i></i><i></i><i></i></span>
+                    <span class="paper" style="--k:3"><b>Декларация<em>XML</em></b><i></i><i></i><i></i></span>
+                  </div>
+                </div>
+                <div class="case-body">
+                  <p class="case-meta"><b>03</b>Экспорт в Китай</p>
+                  <h3 class="case-title">Документы экспорта из одной таблицы</h3>
+                  <ul class="case-list">
+                    <li>Спецификация, CMR и инвойс собираются из Google-таблицы</li>
+                    <li>Декларация в XML для ВЭД-Декларанта</li>
+                    <li>Контракт на двух языках и девять видов допсоглашений</li>
+                    <li>AI разбирает реквизиты китайских покупателей</li>
+                  </ul>
+                  <p class="case-status"><i aria-hidden="true"></i>Работает, все разделы в деле</p>
+                </div>
+              </div>
+            </li>
+
+            <!-- 04. Договоры: страница Word, бот вносит правку и оставляет примечание -->
+            <li class="case" data-reveal data-scene style="--d:0ms;--done:2.3s">
+              <div class="case-in">
+                <div class="case-scene sc-word" aria-hidden="true">
+                  <div class="page">
+                    <b class="pg-title">Договор на обследование</b>
+                    <i style="--w:94%;--q:0"></i><i style="--w:86%;--q:1"></i><i style="--w:90%;--q:2"></i>
+                    <p class="pg-text">4.2. Оплата в течение <del>30 календарных</del> <ins>10 рабочих</ins> дней</p>
+                    <i style="--w:92%;--q:3"></i><i style="--w:70%;--q:4"></i><i style="--w:88%;--q:5"></i>
+                  </div>
+                  <div class="note"><b>Правка</b><span>В вашем шаблоне 10 рабочих дней</span></div>
+                </div>
+                <div class="case-body">
+                  <p class="case-meta"><b>04</b>Строительная экспертиза</p>
+                  <h3 class="case-title">КП, договоры и журналы обследований</h3>
+                  <ul class="case-list">
+                    <li>КП из документов заказчика или из свободного текста</li>
+                    <li>Договор собирается из КП</li>
+                    <li>Чужой договор проверяется с правками в режиме рецензирования Word</li>
+                    <li>Видео и фото с объекта превращаются в журнал работ</li>
+                  </ul>
+                  <p class="case-status"><i aria-hidden="true"></i>Работает</p>
+                </div>
+              </div>
+            </li>
+
+            <!-- 05. ЭТрН: накладная набирается в XML и сходится с эталоном -->
+            <li class="case" data-reveal data-scene style="--d:90ms;--done:2.6s">
+              <div class="case-in">
+                <div class="case-scene sc-xml" aria-hidden="true">
+                  <div class="xml-bar"><span>etrn-248.xml</span><span class="xml-ok"><i></i>Совпадает с эталоном</span></div>
+                  <ol class="xml-code">
+                    <li style="--l:0"><span>&lt;<b>ЭТрН</b> <em>Номер</em>=<u>"248"</u>&gt;</span></li>
+                    <li style="--l:1" class="in"><span>&lt;<b>Грузоотправитель</b> <em>ИНН</em>=<u>"2801…"</u>/&gt;</span></li>
+                    <li style="--l:2" class="in"><span>&lt;<b>Перевозчик</b> <em>ИНН</em>=<u>"2723…"</u>/&gt;</span></li>
+                    <li style="--l:3" class="in"><span>&lt;<b>Груз</b> <em>Масса</em>=<u>"20 т"</u> <em>Мест</em>=<u>"18"</u>/&gt;</span></li>
+                    <li style="--l:4" class="in"><span>&lt;<b>Подпись</b> <em>Титул</em>=<u>"1"</u>/&gt;</span></li>
+                    <li style="--l:5"><span>&lt;/<b>ЭТрН</b>&gt;</span></li>
+                  </ol>
+                </div>
+                <div class="case-body">
+                  <p class="case-meta"><b>05</b>Платформа для логистов</p>
+                  <h3 class="case-title">Электронные транспортные накладные и CRM</h3>
+                  <ul class="case-list">
+                    <li>ЭТрН заполняются по эталонным XML Контура</li>
+                    <li>У каждой компании свои стадии, поля и правила CRM</li>
+                    <li>Документы и УПД в XML, оплаты и зарплата по трём схемам</li>
+                    <li>Компании входят по ключу, сотрудники по приглашению</li>
+                  </ul>
+                  <p class="case-status"><i aria-hidden="true"></i>Работает</p>
+                </div>
+              </div>
+            </li>
+
+            <!-- 06. ТРАНС-Менеджер: сводка, платежи разносятся, сканы проверяются, проект ещё в работе.
+                 Во всю ширину, как площадка, но сцена справа -->
+            <li class="case case-wide is-flip" data-reveal data-scene style="--d:0ms">
+              <div class="case-in">
+                <div class="case-scene sc-dash" aria-hidden="true">
+                  <div class="dash-top"><i></i>База ТРАНС-Менеджера найдена</div>
+                  <div class="dash-grid">
+                    <div class="dash-tile">
+                      <span class="dash-label">Платежи</span>
+                      <span class="dash-pay"><b class="dash-num"></b><small>разнесены по заявкам</small></span>
+                    </div>
+                    <div class="dash-tile">
+                      <span class="dash-label">Сканы</span>
+                      <ul class="dash-scans"><li class="ok" style="--s:0">ТТН</li><li class="ok" style="--s:1">Акт</li><li class="run" style="--s:2">Счёт</li></ul>
+                    </div>
+                    <div class="dash-tile dash-kpi">
+                      <span class="dash-label">KPI менеджера</span>
+                      <span class="dash-bars"><i style="--v:.55;--b:0"></i><i style="--v:.7;--b:1"></i><i style="--v:.62;--b:2"></i><i style="--v:.84;--b:3"></i><i style="--v:.76;--b:4"></i><i style="--v:.9;--b:5"></i><i style="--v:.97;--b:6"></i></span>
+                    </div>
+                  </div>
+                </div>
+                <div class="case-body">
+                  <p class="case-meta"><b>06</b>Грузоперевозчик</p>
+                  <h3 class="case-title">Контроль перевозок в ТРАНС-Менеджере</h3>
+                  <ul class="case-list">
+                    <li>Работает прямо в базе ТРАНС-Менеджера и сама её находит</li>
+                    <li>Проверяет сканы документов перевозчика</li>
+                    <li>Разносит банковские платежи по заявкам</li>
+                    <li>Регламент менеджера с KPI, установщик и автообновления</li>
+                  </ul>
+                  <p class="case-status is-work"><i aria-hidden="true"></i>В работе, запускаем у первого перевозчика</p>
+                </div>
+              </div>
+            </li>
+
+            <!-- Полоса в конце: это не все проекты -->
+            <li class="case case-more" data-reveal style="--d:0ms">
+              <div class="case-in">
+                <div class="more-copy">
+                  <p class="more-title">Это не все проекты</p>
+                  <p class="more-text">Здесь шесть систем. Остальные тоже работают у клиентов, расскажем о похожих на вашу задачу</p>
+                </div>
+                <a class="btn btn-lime" href="brief.html">
+                  <span class="btn-knife" data-knife aria-hidden="true"></span>
+                  Обсудить задачу
+                </a>
+              </div>
+            </li>
+        </ol>
       </div>
     </section>
 
@@ -653,6 +878,7 @@
         <nav class="ftr-nav" aria-label="Разделы внизу страницы">
           <a href="#how">Как работаем</a>
           <a href="#services">Что делаем</a>
+          <a href="#cases">Кейсы</a>
           <a href="#works">Работы</a>
           <a href="#pricing">Цена</a>
           <a href="#faq">Вопросы</a>

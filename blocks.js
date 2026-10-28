@@ -36,6 +36,39 @@
     })
   }
 
+  /* ---------- Кейсы: у каждой карточки своя сцена ---------- */
+  // Сцена доехала до экрана, и карточка получает is-play: таблица заполняется, документы раскладываются,
+  // в договор вносится правка, накладная набирается, сводка растёт (всё на переходах в styles.css).
+  // Наведение на компьютере проигрывает сцену заново, но не чаще раза в три секунды, чтобы она не дёргалась,
+  // когда мышь просто идёт мимо
+  const caseCards = [...document.querySelectorAll('.case[data-scene]')]
+  if (caseCards.length) {
+    const played = new Map()
+    const play = card => {
+      played.set(card, performance.now())
+      card.classList.add('is-reset')
+      card.classList.remove('is-play')
+      void card.offsetWidth
+      card.classList.remove('is-reset')
+      card.classList.add('is-play')
+    }
+    if (reduce) caseCards.forEach(c => c.classList.add('is-play'))
+    else {
+      const seen = new IntersectionObserver(entries => entries.forEach(e => {
+        if (!e.isIntersecting) return
+        seen.unobserve(e.target)
+        setTimeout(() => play(e.target.closest('.case')), 350)   // сначала карточка проявляется, потом оживает сцена
+      }), { threshold: 0.6 })
+      caseCards.forEach(card => {
+        seen.observe(card.querySelector('.case-scene'))
+        card.addEventListener('pointerenter', () => {
+          if (document.body.classList.contains('hoverable') && card.classList.contains('is-play') &&
+              performance.now() - played.get(card) > 3000) play(card)
+        })
+      })
+    }
+  }
+
   /* ---------- Появление секций при прокрутке ---------- */
   const io = new IntersectionObserver(entries => {
     entries.forEach(e => {

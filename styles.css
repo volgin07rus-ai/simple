@@ -269,6 +269,10 @@ html::-webkit-scrollbar{ display:none }
    проявляется. Старый запасной фон (сетка точек и светящиеся пятна) убран: при загрузке он мелькал.
    В браузере без WebGPU первый экран так и остаётся тёмным */
 .waves{ position:absolute; inset:0 }
+/* Свет из символов (GradientASCII, gradient-ascii.js): холст проявляется, когда нарисован первый кадр */
+.gradient-ascii{ overflow:hidden; pointer-events:none; isolation:isolate }
+.gradient-ascii__canvas{ position:absolute; inset:0; display:block; width:100%; height:100%; opacity:0; transition:opacity .6s cubic-bezier(.22,1,.36,1) }
+.gradient-ascii[data-ready='true'] .gradient-ascii__canvas{ opacity:1 }
 .shape-waves{ overflow:hidden; pointer-events:none; isolation:isolate }
 .shape-waves__canvas{
   position:absolute; inset:0; display:block; width:100%; height:100%;
@@ -1138,6 +1142,12 @@ html.is-grabbing,html.is-grabbing *{ cursor:grabbing !important }
   mask-image:linear-gradient(transparent 4.5rem, #000 9rem, #000 40%, transparent 96%), linear-gradient(90deg, rgba(0,0,0,.35), #000 60%);
   mask-composite:intersect }
 .bt-term-canvas{ display:block; width:100%; height:100% }
+/* поле фигур на брифе: сверху уходит под меню, снизу растворяется в странице, слева под текстом чуть тише */
+.bt-bg{
+  -webkit-mask-image:linear-gradient(transparent 3rem, #000 8rem, #000 55%, transparent 98%), linear-gradient(90deg, rgba(0,0,0,.55), #000 60%);
+  -webkit-mask-composite:source-in;
+  mask-image:linear-gradient(transparent 3rem, #000 8rem, #000 55%, transparent 98%), linear-gradient(90deg, rgba(0,0,0,.55), #000 60%);
+  mask-composite:intersect }
 .bt-eyebrow{ margin:0 0 1.4rem; font-size:.8rem; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:var(--lime) }
 .bt-h1{ font-size:4.8rem }
 .bt-lead{ max-width:34rem }
@@ -1691,6 +1701,301 @@ main{ position:relative }
 }
 @media (prefers-reduced-motion:reduce){
   .svc-desc,.svc-desc > p,.dm,.dm *,.svc-cap-text{ transition:none !important; animation:none !important }
+}
+
+/* ============ Кейсы: что уже работает у клиентов ============ */
+/* Сетка 12 колонок: площадка во всю ширину, дальше 7/5 и 5/7, ТРАНС-Менеджер снова во всю ширину (сцена справа),
+   внизу полоса «Это не все проекты». Карточки нарочно не стеклянные, чтобы не повторять
+   «Как идёт задача»: у каждой своя сцена, то, что система выдаёт. Сайт, таблица, стопка документов, правка в Word,
+   XML накладной, сводка. Когда сцена доезжает до экрана, blocks.js ставит карточке is-play, и сцена проигрывается
+   один раз, наведение на компьютере проигрывает её заново. Внутри сцены всё в em: шрифт сцены идёт от ширины
+   карточки (100cqw), и сцена растёт и сжимается вместе с ней */
+.cases-grid{ list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(12, minmax(0,1fr)); gap:1.25rem }
+.case{ grid-column:span 7; min-width:0 }
+.case:nth-child(4n+3),.case:nth-child(4n){ grid-column:span 5 }
+.case.case-wide,.case.case-more{ grid-column:1 / -1 }
+.case[data-reveal]{
+  opacity:0; transform:translateY(18px);
+  transition:opacity .8s var(--ease-out) var(--d,0ms), transform .8s var(--ease-out) var(--d,0ms);
+}
+.case.is-in{ opacity:1; transform:none }
+.case-in{
+  container-type:inline-size; height:100%; display:flex; flex-direction:column; padding:.55rem;
+  border-radius:1.25rem; border:1px solid var(--line-2); background:#0c0e0b;
+  transition:border-color .5s var(--ease-quart);
+}
+.hoverable .case:hover .case-in{ border-color:rgba(216,255,50,.3) }
+.case-body{ flex:1; display:flex; flex-direction:column; padding:1.15rem 1rem .85rem }
+
+.case-meta{ margin:0; font-size:.85rem; line-height:1.4; color:var(--faint) }
+.case-meta b{ margin-right:.6rem; font-weight:500; color:var(--lime); font-variant-numeric:tabular-nums }
+.case-title{ margin:.55rem 0 0; font-size:1.6rem; font-weight:600; letter-spacing:-.02em; line-height:1.2; text-wrap:balance }
+.case-list{ list-style:none; margin:1.1rem 0 1.5rem; padding:0; display:grid; gap:.55rem; font-size:.95rem; line-height:1.45; color:var(--muted) }
+.case-list li{ position:relative; padding-left:1.1rem }
+.case-list li::before{ content:""; position:absolute; left:0; top:.72em; width:.45rem; height:1px; background:var(--faint) }
+.case-status{
+  margin:auto 0 0; padding-top:1rem; border-top:1px solid var(--line);
+  display:flex; align-items:center; gap:.55rem; font-size:.88rem; line-height:1.4; color:var(--ink);
+}
+/* ссылка на площадку уходит на свою строку, если рядом со статусом ей тесно */
+.case-status:has(.case-link){ flex-wrap:wrap }
+.case-status i{ flex:none; width:.45rem; height:.45rem; border-radius:50%; background:var(--lime) }
+/* сцена доиграла, и точка статуса оживает, как «работает» на панели первого экрана; у площадки она живая сразу */
+.case.is-play .case-status:not(.is-work) i{ animation:blink 1.6s ease-in-out var(--done,0s) infinite }
+.case-wide .case-status i{ animation:blink 1.6s ease-in-out infinite }
+/* проект ещё в работе: вместо точки медленно крутится кольцо */
+.case-status.is-work i{
+  width:.62rem; height:.62rem; background:none;
+  border:1.5px solid rgba(216,255,50,.25); border-top-color:var(--lime); animation:case-spin 1.6s linear infinite;
+}
+@keyframes case-spin{ to{ transform:rotate(1turn) } }
+.case-link{ margin-left:auto; display:inline-flex; align-items:center; gap:.3rem; font-weight:500; color:var(--lime); text-decoration:none }
+.case-link svg{ width:.95rem; height:.95rem; transition:transform .3s var(--ease-quart) }
+.hoverable .case-link:hover svg{ transform:translate(2px,-2px) }
+.case-link:focus-visible{ outline:2px solid var(--lime); outline-offset:3px; border-radius:.3rem }
+
+/* окно сцены */
+.case-scene{
+  position:relative; overflow:hidden; height:15.5em; flex:none;
+  border-radius:.75rem; border:1px solid var(--line); background:#070806;
+  font-size:clamp(.72rem, calc(100cqw / 30), .95rem); line-height:1.35; color:var(--muted);
+}
+/* повтор по наведению: всё мгновенно в начало, потом сцена заново */
+.case.is-reset .case-scene *,.case.is-reset .case-scene *::before,.case.is-reset .case-scene *::after{ transition:none !important }
+
+/* 01. Площадка: окно браузера, главная то на русском, то на китайском */
+.case-wide .case-in{ display:grid; grid-template-columns:minmax(0,1.45fr) minmax(0,1fr) }
+.case-wide .case-body{ padding:1.5rem 1.6rem 1rem 2rem }
+.case-wide .case-title{ font-size:2rem }
+.case-wide.is-flip .case-in{ grid-template-columns:minmax(0,1fr) minmax(0,1.45fr) }
+.case-wide.is-flip .case-body{ padding:1.5rem 2rem 1rem 1.6rem }
+@media (min-width:1025px){
+  .case-wide .case-scene{ height:auto }
+  .case-wide.is-flip .case-scene{ order:2 }
+}
+.sc-site{ display:flex; flex-direction:column; height:auto; text-decoration:none; color:inherit }
+.site-bar{ flex:none; display:flex; align-items:center; gap:1em; height:2.6em; padding:0 1em; border-bottom:1px solid var(--line); background:#0f110d }
+.site-dots{ display:flex; gap:.45em }
+.site-dots i{ width:.7em; height:.7em; border-radius:50%; background:rgba(255,255,255,.13) }
+.site-url{
+  flex:1; max-width:22em; margin:0 auto; padding:.3em .9em; border-radius:.5em; background:rgba(255,255,255,.05);
+  font-size:.85em; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.site-lang{ display:flex; gap:.8em; font-size:.85em; color:var(--faint) }
+.site-lang b{ font-weight:500 }
+.site-lang b:first-child{ color:var(--lime); animation:site-ru 10s var(--ease-inout) infinite }
+.site-lang b + b{ animation:site-zh 10s var(--ease-inout) infinite }
+.site-shot{ position:relative; flex:1; display:block; aspect-ratio:16 / 9; overflow:hidden; background:#1b2013 }
+.site-shot img{
+  position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center top;
+  transition:transform 1.2s var(--ease-out);
+}
+.site-shot img + img{ opacity:0; animation:site-zh-shot 10s var(--ease-inout) infinite }
+.hoverable .sc-site:hover .site-shot img{ transform:scale(1.025) }
+@keyframes site-zh-shot{ 0%,42%{ opacity:0 } 50%,92%{ opacity:1 } 100%{ opacity:0 } }
+@keyframes site-ru{ 0%,42%{ color:var(--lime) } 50%,92%{ color:var(--faint) } 100%{ color:var(--lime) } }
+@keyframes site-zh{ 0%,42%{ color:var(--faint) } 50%,92%{ color:var(--lime) } 100%{ color:var(--faint) } }
+
+/* 02. CRM: строки грузов въезжают, счета и УПД отмечаются по очереди, одна УПД ещё ждёт */
+.sc-crm{ display:flex; flex-direction:column; justify-content:center; gap:.45em; padding:.9em 1em }
+.crm-head,.crm-row{
+  display:grid; grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) 2.6em 2.6em; align-items:center; column-gap:.7em; padding:0 .8em;
+}
+.crm-head{ padding-bottom:.45em; border-bottom:1px solid var(--line); color:var(--faint) }
+.crm-head span{ font-size:.78em }
+.crm-head span:nth-child(n+3){ text-align:center }
+.crm-row{
+  padding-top:.5em; padding-bottom:.5em; border-radius:.55em; background:rgba(255,255,255,.03);
+  opacity:0; transform:translateY(.5em);
+  transition:opacity .5s var(--ease-out), transform .6s var(--ease-out); transition-delay:calc(var(--r) * 130ms);
+}
+.is-play .crm-row{ opacity:1; transform:none }
+.crm-cargo,.crm-sum{ min-width:0 }
+.crm-cargo b{ display:block; font-weight:500; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.crm-row small{ display:block; margin-top:.1em; font-size:.76em; color:var(--faint); white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.crm-sum{ color:var(--ink); font-variant-numeric:tabular-nums; white-space:nowrap }
+.crm-sum small{ font-variant-numeric:normal }
+.crm-row i{
+  --t:calc(600ms + var(--c) * 480ms + var(--r) * 160ms);
+  position:relative; justify-self:center; width:1.2em; height:1.2em; border-radius:50%; box-shadow:inset 0 0 0 1px rgba(255,255,255,.2);
+  transition:background .3s var(--ease-quart) var(--t), box-shadow .3s var(--ease-quart) var(--t);
+}
+.crm-row i::after{
+  content:""; position:absolute; left:.43em; top:.24em; width:.28em; height:.55em;
+  border:solid #0b0c08; border-width:0 .13em .13em 0;
+  transform:rotate(45deg) scale(0); transition:transform .35s cubic-bezier(.34,1.56,.64,1) var(--t);
+}
+.is-play .crm-row i.ok{ background:var(--lime); box-shadow:inset 0 0 0 1px var(--lime) }
+.is-play .crm-row i.ok::after{ transform:rotate(45deg) scale(1) }
+.crm-row i.wait{ box-shadow:inset 0 0 0 1px rgba(216,255,50,.45) }
+.is-play .crm-row i.wait{ animation:blink 1.6s ease-in-out 1.9s infinite }
+
+/* 03. Экспорт: строка таблицы подсвечивается, из неё раскладывается стопка документов */
+.sc-docs{ display:grid; grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr); gap:1.2em; padding:1.1em 1.1em 0 }
+.sheet{ align-self:start; overflow:hidden; border:1px solid var(--line-2); border-radius:.5em; background:#0d0f0b }
+.sheet-name{ display:flex; align-items:center; gap:.5em; height:2.1em; padding:0 .7em; border-bottom:1px solid var(--line); color:var(--muted) }
+.sheet-name i{ flex:none; width:.8em; height:.8em; border-radius:.2em; background:var(--lime) }
+.sheet-grid{ display:block }
+.sheet-row{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); border-bottom:1px solid var(--line); transition:background .4s var(--ease-quart) .2s }
+.sheet-row:last-child{ border-bottom:0 }
+.sheet-row i{ position:relative; height:2em; border-right:1px solid var(--line) }
+.sheet-row i:last-child{ border-right:0 }
+.sheet-row i::after{
+  content:""; position:absolute; left:.45em; top:50%; width:var(--w); max-width:calc(100% - .9em); height:.32em; margin-top:-.16em;
+  border-radius:.2em; background:rgba(255,255,255,.14); transition:background .4s var(--ease-quart) .2s;
+}
+.is-play .sheet-row.is-pick{ background:rgba(216,255,50,.1) }
+.is-play .sheet-row.is-pick i::after{ background:var(--lime) }
+.papers{ position:relative }
+.paper{
+  position:absolute; left:calc(var(--k) * 11%); top:calc(var(--k) * 2.1em); width:67%; height:8em;
+  display:flex; flex-direction:column; gap:.55em; padding:.65em .75em;
+  border:1px solid var(--line-2); border-radius:.4em; background:#191c16; box-shadow:0 .8em 1.6em -.6em rgba(0,0,0,.85);
+  clip-path:polygon(0 0, calc(100% - 1.1em) 0, 100% 1.1em, 100% 100%, 0 100%);
+  opacity:0; transform:translate(-55%, 1.2em) scale(.7);
+  transition:opacity .45s var(--ease-out), transform .75s var(--ease-out); transition-delay:calc(450ms + var(--k) * 170ms);
+}
+.paper::after{ content:""; position:absolute; top:0; right:0; width:1.1em; height:1.1em; background:linear-gradient(225deg, transparent 50%, #2d3127 50%) }
+.is-play .paper{ opacity:1; transform:none }
+.paper b{ display:flex; align-items:baseline; gap:.5em; font-size:.82em; font-weight:500; color:var(--ink); white-space:nowrap; overflow:hidden }
+.paper em{ font-style:normal; font-size:.85em; color:var(--lime) }
+.paper i{ height:.3em; border-radius:.2em; background:rgba(255,255,255,.1) }
+.paper i:nth-of-type(1){ width:80% }
+.paper i:nth-of-type(2){ width:62% }
+.paper i:nth-of-type(3){ width:72% }
+
+/* 04. Договоры: строки страницы проявляются, срок оплаты зачёркивается, вписывается новый, справа примечание */
+.sc-word{ background:#0a0b09 }
+.page{
+  position:absolute; left:1.2em; top:1.2em; right:36%; bottom:-1em; padding:1.3em 1.3em 0;
+  display:flex; flex-direction:column; gap:.62em;
+  border-radius:.35em .35em 0 0; background:#e9ebe1; color:#20231b; box-shadow:0 1em 2.5em -1em rgba(0,0,0,.8);
+}
+.pg-title{ margin-bottom:.3em; font-size:.9em; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.page > i{
+  display:block; flex:none; width:var(--w); height:.34em; border-radius:.2em; background:#c8cbbe;
+  transform:scaleX(0); transform-origin:left; transition:transform .5s var(--ease-out) calc(100ms + var(--q) * 70ms);
+}
+.is-play .page > i{ transform:none }
+.pg-text{ margin:.15em 0; font-size:.8em; line-height:1.55 }
+.pg-text del{
+  text-decoration:none; color:inherit;
+  background:linear-gradient(currentColor, currentColor) 0 58% / 0% .1em no-repeat;
+  transition:background-size .45s var(--ease-quart) .8s, color .45s var(--ease-quart) .8s;
+}
+.is-play .pg-text del{ background-size:100% .1em; color:#8d9085 }
+.pg-text ins{
+  padding:0 .15em; border-radius:.15em; text-decoration:none; font-weight:600; color:#14160f; opacity:0;
+  background:linear-gradient(var(--lime), var(--lime)) 0 0 / 0% 100% no-repeat;
+  -webkit-box-decoration-break:clone; box-decoration-break:clone;
+  transition:opacity .3s var(--ease-quart) 1.2s, background-size .5s var(--ease-quart) 1.25s;
+}
+.is-play .pg-text ins{ opacity:1; background-size:100% 100% }
+.note{
+  position:absolute; right:1em; top:6.6em; width:calc(36% - 2.2em); padding:.65em .75em;
+  border-radius:.5em; border:1px solid rgba(216,255,50,.35); background:#151812;
+  opacity:0; transform:translateX(.8em);
+  transition:opacity .5s var(--ease-out) 1.7s, transform .6s var(--ease-out) 1.7s;
+}
+.note::before{ content:""; position:absolute; right:100%; top:1.1em; width:1.2em; border-top:1px dashed rgba(216,255,50,.5) }
+.note b{ display:block; margin-bottom:.25em; font-size:.78em; font-weight:500; color:var(--lime) }
+.note span{ display:block; font-size:.78em; line-height:1.4; color:var(--ink) }
+.is-play .note{ opacity:1; transform:none }
+
+/* 05. ЭТрН: накладная набирается строка за строкой, в конце сверка с эталоном */
+.sc-xml{ display:flex; flex-direction:column; background:#0a0b09 }
+.xml-bar{ flex:none; display:flex; align-items:center; justify-content:space-between; gap:1em; height:2.5em; padding:0 1em; border-bottom:1px solid var(--line) }
+.xml-bar > span{ font-size:.82em; color:var(--faint); white-space:nowrap }
+.xml-bar .xml-ok{ display:flex; align-items:center; gap:.45em; color:var(--lime); opacity:0; transition:opacity .5s var(--ease-quart) 2.3s }
+.xml-ok i{ width:.5em; height:.5em; border-radius:50%; background:var(--lime) }
+.is-play .xml-bar .xml-ok{ opacity:1 }
+.xml-code{
+  list-style:none; margin:0; padding:1em 1em; counter-reset:ln;
+  display:flex; flex-direction:column; justify-content:center; gap:.36em; flex:1; font-variant-numeric:tabular-nums;
+}
+.xml-code li{ counter-increment:ln; display:flex; gap:1.1em; white-space:nowrap }
+.xml-code li::before{ content:counter(ln); flex:none; width:1.1em; text-align:right; color:rgba(243,245,238,.22) }
+.xml-code li.in span{ margin-left:1.4em }
+.xml-code span{
+  color:var(--faint); clip-path:inset(0 100% 0 0);
+  transition:clip-path .55s steps(16, end); transition-delay:calc(250ms + var(--l) * 330ms);
+}
+.is-play .xml-code span{ clip-path:inset(0 0 0 0) }
+.xml-code b{ font-weight:500; color:var(--lime) }
+.xml-code em{ font-style:normal; color:var(--muted) }
+.xml-code u{ text-decoration:none; color:var(--ink) }
+
+/* 06. ТРАНС-Менеджер: база найдена, платежи досчитываются, сканы отмечаются, третий ещё проверяется.
+   Слева платежи и сканы друг под другом, справа KPI на всю высоту */
+@property --pay{ syntax:'<integer>'; inherits:false; initial-value:0 }
+.sc-dash{ display:flex; flex-direction:column; gap:.8em; padding:1em }
+.dash-top{ flex:none; display:flex; align-items:center; gap:.55em; font-size:.82em; color:var(--muted); opacity:0; transition:opacity .5s var(--ease-quart) .15s }
+.dash-top i{ width:.55em; height:.55em; border-radius:50%; background:var(--lime) }
+.is-play .dash-top{ opacity:1 }
+.dash-grid{ flex:1; min-height:0; display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); grid-template-rows:1fr 1fr; gap:.6em }
+.dash-kpi{ grid-column:2; grid-row:1 / span 2 }
+.dash-tile{
+  min-width:0; min-height:0; display:flex; flex-direction:column; justify-content:space-between; gap:.4em; padding:.75em .85em;
+  border-radius:.6em; border:1px solid var(--line); background:rgba(255,255,255,.035);
+}
+.dash-label{ font-size:.76em; color:var(--faint) }
+.dash-pay{ display:flex; align-items:baseline; gap:.6em; min-width:0 }
+.dash-num{
+  flex:none; font-size:2.2em; font-weight:600; line-height:1; letter-spacing:-.02em; color:var(--ink); font-variant-numeric:tabular-nums;
+  counter-reset:pay var(--pay, 0); transition:--pay 1.4s var(--ease-out) .5s;
+}
+.dash-num::after{ content:counter(pay) }
+.is-play .dash-num{ --pay:24 }
+.dash-tile small{ min-width:0; font-size:.74em; line-height:1.3; color:var(--faint) }
+.dash-scans{ list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap; gap:.4em 1.1em }
+.dash-scans li{ display:flex; align-items:center; gap:.5em; font-size:.85em; color:var(--muted); white-space:nowrap }
+.dash-scans li::before{
+  content:""; flex:none; width:.9em; height:.9em; border-radius:50%; box-shadow:inset 0 0 0 1px rgba(255,255,255,.2);
+  transition:background .3s var(--ease-quart) calc(.6s + var(--s) * .35s), box-shadow .3s var(--ease-quart) calc(.6s + var(--s) * .35s);
+}
+.is-play .dash-scans li.ok::before{ background:var(--lime); box-shadow:inset 0 0 0 1px var(--lime) }
+.dash-scans li.run::before{ box-shadow:none; border:.13em solid rgba(216,255,50,.25); border-top-color:var(--lime); animation:case-spin 1.4s linear infinite }
+.dash-bars{ flex:1; min-height:3em; display:flex; align-items:flex-end; justify-content:space-between; gap:.35em; padding-top:.4em; border-bottom:1px solid var(--line-2) }
+.dash-bars i{
+  flex:1 1 0; max-width:1.5em; height:100%; border-radius:.2em .2em 0 0; background:rgba(216,255,50,.38);
+  transform:scaleY(0); transform-origin:bottom; transition:transform .8s var(--ease-out) calc(.5s + var(--b) * .12s);
+}
+.dash-bars i:last-child{ background:var(--lime) }
+.is-play .dash-bars i{ transform:scaleY(var(--v)) }
+
+/* Полоса в конце: это не все проекты. Пунктирная рамка, как место под следующие карточки */
+.case-more .case-in{
+  flex-direction:row; align-items:center; justify-content:space-between; gap:2rem; padding:1.7rem 1.8rem 1.7rem 2rem;
+  border:1px dashed rgba(216,255,50,.35); background:transparent;
+}
+.hoverable .case-more:hover .case-in{ border-color:rgba(216,255,50,.6) }
+.more-title{ margin:0; font-size:1.9rem; font-weight:600; letter-spacing:-.02em; line-height:1.15 }
+.more-text{ margin:.5rem 0 0; max-width:38rem; font-size:1.02rem; line-height:1.5; color:var(--muted) }
+.case-more .btn{ flex:none }
+
+@media (max-width:1024px){
+  .case,.case:nth-child(4n+3),.case:nth-child(4n){ grid-column:span 6 }
+  .case-wide .case-in{ display:flex }
+  .case-wide .case-body{ padding:1.15rem 1rem .85rem }
+  .case-title{ font-size:1.45rem }
+  .case-wide .case-title{ font-size:1.75rem }
+  .case-wide.is-flip .case-body{ padding:1.15rem 1rem .85rem }
+  .more-title{ font-size:1.6rem }
+}
+@media (max-width:640px){
+  .cases-grid{ gap:1rem }
+  .case,.case:nth-child(4n+3),.case:nth-child(4n){ grid-column:span 12 }
+  .case-body,.case-wide .case-body{ padding:1rem .75rem .7rem }
+  .case-title,.case-wide .case-title{ font-size:1.3rem }
+  .case-more .case-in{ flex-direction:column; align-items:flex-start; gap:1.4rem; padding:1.5rem 1.25rem }
+  .more-title{ font-size:1.4rem }
+  .more-text{ font-size:.95rem }
+}
+@media (prefers-reduced-motion:reduce){
+  .case[data-reveal]{ opacity:1; transform:none; transition:none }
+  .case-scene *,.case-scene *::before,.case-scene *::after{ transition:none !important }
+  .site-shot img + img,.site-lang b{ animation:none !important }
+  .case-status.is-work i{ animation:none }
 }
 
 /* ============ 4. Работы на главной: наклонная стена (DriftWall) ============ */
